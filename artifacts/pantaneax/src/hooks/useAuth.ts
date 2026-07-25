@@ -13,7 +13,7 @@ export interface User {
 const FETCH_TIMEOUT_MS = 10_000;
 
 /** Maximum ms to wait for Clerk to initialise before giving up. */
-const CLERK_LOAD_TIMEOUT_MS = 15_000;
+const CLERK_LOAD_TIMEOUT_MS = 8_000;
 
 export function useAuth() {
   const { isLoaded: clerkLoaded, isSignedIn } = useClerkAuth();
