@@ -79,7 +79,8 @@ async function buildAll() {
       "kerberos",
       "leveldown",
       "miniflare",
-      "mysql2",
+      // mysql2 is pure JS — bundled so it's available in the dist output
+      // "mysql2",
       "newrelic",
       "odbc",
       "piscina",
