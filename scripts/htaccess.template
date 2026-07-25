@@ -1,13 +1,11 @@
 Options -MultiViews
 RewriteEngine On
 
-# ── Proxy /api to Node.js API server on port 3001 ────────────────────────────
-# mod_proxy is loaded as a static module on this server
-RewriteCond %{REQUEST_URI} ^/api [NC]
-RewriteRule ^(api/.*)$ http://127.0.0.1:3001/$1 [P,L,QSA]
-
 # ── React SPA fallback ────────────────────────────────────────────────────────
 # Serve index.html for any path that isn't a real file or directory
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ /index.html [L]
+
+# ── API proxy is handled via DirectAdmin custom Apache config ─────────────────
+# See scripts/apache-vhost.conf for the ProxyPass directives to add

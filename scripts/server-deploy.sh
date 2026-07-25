@@ -46,9 +46,8 @@ set +a
 
 echo "==> [4/6] Building React frontend..."
 # BASE_PATH and PORT are required by vite.config.ts at build time
-export BASE_PATH="/"
-export PORT=3000
-pnpm --filter @workspace/pantaneax run build
+# Use a subshell so these vars don't bleed into the PM2 start command
+(export BASE_PATH="/"; export PORT=3000; pnpm --filter @workspace/pantaneax run build)
 
 echo "==> [5/6] Deploying frontend to public_html..."
 rm -rf "$PUBLIC_HTML"/*
@@ -59,15 +58,14 @@ echo "  Frontend deployed to $PUBLIC_HTML"
 echo "==> [6/6] Building & restarting API server..."
 pnpm --filter @workspace/api-server run build
 
-# Start or restart with PM2
+# Start or restart with PM2 — always set PORT explicitly so it never inherits
+# the PORT=3000 that was used for the Vite build above
 if pm2 describe "$APP_NAME" &>/dev/null; then
-  pm2 restart "$APP_NAME" --update-env
-else
-  PORT=$API_PORT NODE_ENV=production pm2 start \
-    "node --enable-source-maps $REPO_DIR/artifacts/api-server/dist/index.mjs" \
-    --name "$APP_NAME" \
-    --env production
+  pm2 delete "$APP_NAME"
 fi
+PORT=$API_PORT NODE_ENV=production pm2 start \
+  "node --enable-source-maps $REPO_DIR/artifacts/api-server/dist/index.mjs" \
+  --name "$APP_NAME"
 pm2 save
 
 echo ""
