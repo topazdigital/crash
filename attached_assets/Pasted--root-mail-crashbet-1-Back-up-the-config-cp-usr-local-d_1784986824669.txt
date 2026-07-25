@@ -1,0 +1,86 @@
+[root@mail crashbet]# # 1. Back up the config
+cp /usr/local/directadmin/data/users/admin/httpd.conf \
+   /usr/local/directadmin/data/users/admin/httpd.conf.bak
+
+# 2. Find what's in the aviator vhost block (lines ~248-285)
+grep -n "aviator.betcheza\|ProxyPass\|ProxyPassReverse" \
+  /usr/local/directadmin/data/users/admin/httpd.conf | tail -20
+
+# 3. Remove the catch-all proxy to port 5001 in the aviator vhost
+#    (this is what's causing the 503 — it swallows ALL requests)
+python3 << 'EOF'
+import re
+
+conf = "/usr/local/directadmin/data/users/admin/httpd.conf"
+with open(conf) as f:
+    content = f.read()
+
+def patch_vhost(block):
+    lines = []
+    api_added = False
+    for line in block.split("\n"):
+        s = line.strip()
+        # Remove catch-all ProxyPass to port 5001
+        if re.match(r'ProxyPass\s+/\s+http://127\.0\.0\.1:5001/', s):
+            print(f"  Removing: {s}")
+            continue
+        if re.match(r'ProxyPassReverse\s+/\s+http://127\.0\.0\.1:5001/', s):
+            print(f"  Removing: {s}")
+            continue
+        # Fix AllowOverride None → All so .htaccess SPA routing works
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:3001/api/health" http://127.0.0.1/IGNORECASE)/api',
+384:ProxyPass /.well-known !
+391:ProxyPass /api http://127.0.0.1:4000/api
+392:ProxyPassReverse /api http://127.0.0.1:4000/api
+420:    ProxyPassMatch "^/\.well-known/autoconfig/mail/config-v1\.1\.xml$" "unix:/usr/local/directadmin/shared/internal.sock|http://localhost"
+430:ProxyPass /.well-known !
+437:ProxyPass /api http://127.0.0.1:4000/api
+438:ProxyPassReverse /api http://127.0.0.1:4000/api
+464:    ProxyPassMatch "^/\.well-known/autoconfig/mail/config-v1\.1\.xml$" "unix:/usr/local/directadmin/shared/internal.sock|http://localhost"
+495:    ProxyPassMatch "^/\.well-known/autoconfig/mail/config-v1\.1\.xml$" "unix:/usr/local/directadmin/shared/internal.sock|http://localhost"
+524:    ProxyPassMatch "^/\.well-known/autoconfig/mail/config-v1\.1\.xml$" "unix:/usr/local/directadmin/shared/internal.sock|http://localhost"
+561:    ProxyPassMatch "^/\.well-known/autoconfig/mail/config-v1\.1\.xml$" "unix:/usr/local/directadmin/shared/internal.sock|http://localhost"
+596:    ProxyPassMatch "^/\.well-known/autoconfig/mail/config-v1\.1\.xml$" "unix:/usr/local/directadmin/shared/internal.sock|http://localhost"
+627:    ProxyPassMatch "^/\.well-known/autoconfig/mail/config-v1\.1\.xml$" "unix:/usr/local/directadmin/shared/internal.sock|http://localhost"
+659:    ProxyPassMatch "^/\.well-known/autoconfig/mail/config-v1\.1\.xml$" "unix:/usr/local/directadmin/shared/internal.sock|http://localhost"
+685:    ProxyPassMatch "^/\.well-known/autoconfig/mail/config-v1\.1\.xml$" "unix:/usr/local/directadmin/shared/internal.sock|http://localhost"
+714:    ProxyPassMatch "^/\.well-known/autoconfig/mail/config-v1\.1\.xml$" "unix:/usr/local/directadmin/shared/internal.sock|http://localhost"
+740:    ProxyPassMatch "^/\.well-known/autoconfig/mail/config-v1\.1\.xml$" "unix:/usr/local/directadmin/shared/internal.sock|http://localhost"
+769:    ProxyPassMatch "^/\.well-known/autoconfig/mail/config-v1\.1\.xml$" "unix:/usr/local/directadmin/shared/internal.sock|http://localhost"
+800:    ProxyPassMatch "^/\.well-known/autoconfig/mail/config-v1\.1\.xml$" "unix:/usr/local/directadmin/shared/internal.sock|http://localhost"
+829:    ProxyPassMatch "^/\.well-known/autoconfig/mail/config-v1\.1\.xml$" "unix:/usr/local/directadmin/shared/internal.sock|http://localhost"
+
+[Patching vhost for aviator.betcheza.co.ke]
+  Removing: ProxyPass / http://127.0.0.1:5001/
+  Removing: ProxyPassReverse / http://127.0.0.1:5001/
+  Added: ProxyPass /api -> 3001
+
+[Patching vhost for aviator.betcheza.co.ke]
+  Removing: ProxyPass / http://127.0.0.1:5001/
+  Removing: ProxyPassReverse / http://127.0.0.1:5001/
+  Added: ProxyPass /api -> 3001
+
+Done.
+AH00112: Warning: DocumentRoot [/home/admin/domains/dossy.world/public_html/test] does not exist
+AH00112: Warning: DocumentRoot [/home/admin/domains/dossy.world/public_html/test] does not exist
+Syntax OK
+The service command supports only basic LSB actions (start, stop, restart, try-restart, reload, reload-or-restart, try-reload-or-restart, force-reload, status, condrestart). For other actions, please try to use systemctl.
+200
+
+>>>> In-memory PM2 is out-of-date, do:
+>>>> $ pm2 update
+In memory PM2 version: 7.0.1
+Local PM2 version: 7.0.3
+
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 3  │ betcheza           │ fork     │ 67   │ online    │ 0%       │ 1.7gb    │
+│ 7  │ crashbet-api       │ fork     │ 2399 │ online    │ 66.7%    │ 69.4mb   │
+│ 0  │ dossy              │ fork     │ 0    │ online    │ 0%       │ 21.1mb   │
+│ 2  │ naughtyhaughty-api │ fork     │ 0    │ online    │ 0%       │ 81.4mb   │
+│ 4  │ rdn-api            │ fork     │ 0    │ online    │ 0%       │ 171.6mb  │
+│ 1  │ wet3camp-api       │ fork     │ 0    │ online    │ 0%       │ 53.6mb   │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+200
+[root@mail crashbet]#
