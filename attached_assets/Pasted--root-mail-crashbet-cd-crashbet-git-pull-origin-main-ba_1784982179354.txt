@@ -1,0 +1,58 @@
+[root@mail crashbet]# cd ~/crashbet && git pull origin main && bash scripts/server-deploy.sh
+remote: Enumerating objects: 21, done.
+remote: Counting objects: 100% (21/21), done.
+remote: Compressing objects: 100% (8/8), done.
+remote: Total 17 (delta 9), reused 17 (delta 9), pack-reused 0 (from 0)
+Unpacking objects: 100% (17/17), 811.89 KiB | 8.12 MiB/s, done.
+From https://github.com/topazdigital/crash
+ * branch            main       -> FETCH_HEAD
+   8a102f8..5bcd032  main       -> origin/main
+Updating 8a102f8..5bcd032
+Fast-forward
+ attached_assets/image_1784981384898.png | Bin 0 -> 196310 bytes
+ attached_assets/image_1784981528095.png | Bin 0 -> 246059 bytes
+ attached_assets/image_1784981561566.png | Bin 0 -> 271232 bytes
+ attached_assets/image_1784981860790.png | Bin 0 -> 197583 bytes
+ scripts/server-deploy.sh                |   3 +++
+ 5 files changed, 3 insertions(+)
+ create mode 100644 attached_assets/image_1784981384898.png
+ create mode 100644 attached_assets/image_1784981528095.png
+ create mode 100644 attached_assets/image_1784981561566.png
+ create mode 100644 attached_assets/image_1784981860790.png
+==> [1/6] Pulling latest code from GitHub...
+From https://github.com/topazdigital/crash
+ * branch            main       -> FETCH_HEAD
+Already up to date.
+==> [2/6] Installing / updating dependencies...
+Scope: all 9 workspace projects
+Lockfile is up to date, resolution step is skipped
+Already up to date
+. preinstall$ sh -c 'rm -f package-lock.json yarn.lock; case "$npm_config_user_agent" in pnpm/*) ;; *) echo "Use pnpm instead" >&2; exit 1 ;; esac'
+└─ Done in 33ms
+╭ Warning ───────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                            │
+│   Ignored build scripts: @clerk/shared@3.47.8.                                             │
+│   Run "pnpm approve-builds" to pick which dependencies should be allowed to run scripts.   │
+│                                                                                            │
+╰────────────────────────────────────────────────────────────────────────────────────────────╯
+Done in 4.9s using pnpm v10.34.5
+==> [3/6] Loading production environment variables...
+==> [4/6] Building React frontend...
+
+> @workspace/pantaneax@0.0.0 build /root/crashbet/artifacts/pantaneax
+> vite build --config vite.config.ts
+
+vite v7.3.6 building client environment for production...
+✓ 1837 modules transformed.
+dist/public/index.html                   0.70 kB │ gzip:   0.33 kB
+dist/public/assets/index-Bc5zwyaq.css   70.78 kB │ gzip:  12.50 kB
+dist/public/assets/index-DAcAGl-f.js   501.00 kB │ gzip: 153.18 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 15.01s
+==> [5/6] Deploying frontend to public_html...
+cp: cannot create directory '/domains/aviator.betcheza.co.ke/public_html/': No such file or directory
+[root@mail crashbet]#
