@@ -1,0 +1,73 @@
+[root@mail crashbet]# pm2 logs crashbet-api --lines 30 --nostream
+
+>>>> In-memory PM2 is out-of-date, do:
+>>>> $ pm2 update
+In memory PM2 version: 7.0.1
+Local PM2 version: 7.0.3
+
+[TAILING] Tailing last 30 lines for [crashbet-api] process (change the value with --lines option)
+/root/.pm2/logs/crashbet-api-out.log last 30 lines:
+/root/.pm2/logs/crashbet-api-error.log last 30 lines:
+5|crashbet | Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'mysql2' imported from /root/crashbet/artifacts/api-server/dist/index.mjs
+5|crashbet |     at packageResolve (node:internal/modules/esm/resolve:873:9)
+5|crashbet |     at moduleResolve (node:internal/modules/esm/resolve:946:18)
+5|crashbet |     at defaultResolve (node:internal/modules/esm/resolve:1188:11)
+5|crashbet |     at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:708:12)
+5|crashbet |     at #cachedDefaultResolve (node:internal/modules/esm/loader:657:25)
+5|crashbet |     at ModuleLoader.resolve (node:internal/modules/esm/loader:640:38)
+5|crashbet |     at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:264:38)
+5|crashbet |     at ModuleJob._link (node:internal/modules/esm/module_job:168:49) {
+5|crashbet |   code: 'ERR_MODULE_NOT_FOUND'
+5|crashbet | }
+5|crashbet |
+5|crashbet | Node.js v20.20.2
+5|crashbet | node:internal/modules/esm/resolve:873
+5|crashbet |   throw new ERR_MODULE_NOT_FOUND(packageName, fileURLToPath(base), null);
+5|crashbet |         ^
+5|crashbet |
+5|crashbet | Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'mysql2' imported from /root/crashbet/artifacts/api-server/dist/index.mjs
+5|crashbet |     at packageResolve (node:internal/modules/esm/resolve:873:9)
+5|crashbet |     at moduleResolve (node:internal/modules/esm/resolve:946:18)
+5|crashbet |     at defaultResolve (node:internal/modules/esm/resolve:1188:11)
+5|crashbet |     at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:708:12)
+5|crashbet |     at #cachedDefaultResolve (node:internal/modules/esm/loader:657:25)
+5|crashbet |     at ModuleLoader.resolve (node:internal/modules/esm/loader:640:38)
+5|crashbet |     at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:264:38)
+5|crashbet |     at ModuleJob._link (node:internal/modules/esm/module_job:168:49) {
+5|crashbet |   code: 'ERR_MODULE_NOT_FOUND'
+5|crashbet | }
+5|crashbet |
+5|crashbet | Node.js v20.20.2
+
+[root@mail crashbet]# tail -30 /home/admin/logs/aviator.betcheza.co.ke/error.log 2>/dev/null || tail -30 /var/log/httpd/error_log
+[Sat Jul 25 08:29:14.949375 2026] [security2:error] [pid 930784:tid 930828] [remote 104.28.211.188:19888] ModSecurity: Access denied with code 406 (phase 1). Matched phrase "config.toml" at REQUEST_FILENAME. [file "/etc/modsecurity.d/REQUEST-930-APPLICATION-ATTACK-LFI.conf"] [line "150"] [id "930130"] [msg "Restricted File Access Attempt"] [data "Matched Data: config.toml found within REQUEST_FILENAME: /.codex/config.toml"] [severity "CRITICAL"] [ver "OWASP_CRS/4.25.0"] [tag "application-multi"] [tag "language-multi"] [tag "platform-multi"] [tag "attack-lfi"] [tag "paranoia-level/1"] [tag "OWASP_CRS"] [tag "OWASP_CRS/ATTACK-LFI"] [tag "capec/1000/255/153/126"] [hostname "accounts.naughtyhaughty.com"] [uri "/.codex/config.toml"] [unique_id "amSsGk1EBH7DZx-NtEdIhAAATCo"]
+[Sat Jul 25 08:29:14.949990 2026] [security2:error] [pid 930784:tid 930828] [remote 104.28.211.188:19888] ModSecurity: Access denied with code 406 (phase 1). Matched phrase ".config/" at REQUEST_FILENAME. [file "/etc/modsecurity.d/REQUEST-930-APPLICATION-ATTACK-LFI.conf"] [line "150"] [id "930130"] [msg "Restricted File Access Attempt"] [data "Matched Data: .config/ found within REQUEST_FILENAME: /.config/anthropic/credentials/default.json"] [severity "CRITICAL"] [ver "OWASP_CRS/4.25.0"] [tag "application-multi"] [tag "language-multi"] [tag "platform-multi"] [tag "attack-lfi"] [tag "paranoia-level/1"] [tag "OWASP_CRS"] [tag "OWASP_CRS/ATTACK-LFI"] [tag "capec/1000/255/153/126"] [hostname "accounts.naughtyhaughty.com"] [uri "/.config/anthropic/credentials/default.json"] [unique_id "amSsGk1EBH7DZx-NtEdIhQAATCo"]
+[Sat Jul 25 08:29:14.951216 2026] [security2:error] [pid 930784:tid 930834] [remote 104.28.211.188:19888] ModSecurity: Access denied with code 406 (phase 1). Matched phrase ".env" at REQUEST_FILENAME. [file "/etc/modsecurity.d/REQUEST-930-APPLICATION-ATTACK-LFI.conf"] [line "150"] [id "930130"] [msg "Restricted File Access Attempt"] [data "Matched Data: .env found within REQUEST_FILENAME: /.hermes/.env"] [severity "CRITICAL"] [ver "OWASP_CRS/4.25.0"] [tag "application-multi"] [tag "language-multi"] [tag "platform-multi"] [tag "attack-lfi"] [tag "paranoia-level/1"] [tag "OWASP_CRS"] [tag "OWASP_CRS/ATTACK-LFI"] [tag "capec/1000/255/153/126"] [hostname "accounts.naughtyhaughty.com"] [uri "/.hermes/.env"] [unique_id "amSsGk1EBH7DZx-NtEdIhwAATDA"]
+[Sat Jul 25 08:29:14.951399 2026] [security2:error] [pid 930784:tid 930831] [remote 104.28.211.188:19888] ModSecurity: Access denied with code 406 (phase 1). Matched phrase ".bashrc" at REQUEST_FILENAME. [file "/etc/modsecurity.d/REQUEST-930-APPLICATION-ATTACK-LFI.conf"] [line "150"] [id "930130"] [msg "Restricted File Access Attempt"] [data "Matched Data: .bashrc found within REQUEST_FILENAME: /.bashrc"] [severity "CRITICAL"] [ver "OWASP_CRS/4.25.0"] [tag "application-multi"] [tag "language-multi"] [tag "platform-multi"] [tag "attack-lfi"] [tag "paranoia-level/1"] [tag "OWASP_CRS"] [tag "OWASP_CRS/ATTACK-LFI"] [tag "capec/1000/255/153/126"] [hostname "accounts.naughtyhaughty.com"] [uri "/.bashrc"] [unique_id "amSsGk1EBH7DZx-NtEdIiAAATC0"]
+[Sat Jul 25 08:29:14.951699 2026] [security2:error] [pid 930784:tid 930834] [remote 104.28.211.188:19888] ModSecurity: Access denied with code 406 (phase 1). Matched phrase "/auth.json" at REQUEST_FILENAME. [file "/etc/modsecurity.d/REQUEST-930-APPLICATION-ATTACK-LFI.conf"] [line "150"] [id "930130"] [msg "Restricted File Access Attempt"] [data "Matched Data: /auth.json found within REQUEST_FILENAME: /.hermes/auth.json"] [severity "CRITICAL"] [ver "OWASP_CRS/4.25.0"] [tag "application-multi"] [tag "language-multi"] [tag "platform-multi"] [tag "attack-lfi"] [tag "paranoia-level/1"] [tag "OWASP_CRS"] [tag "OWASP_CRS/ATTACK-LFI"] [tag "capec/1000/255/153/126"] [hostname "accounts.naughtyhaughty.com"] [uri "/.hermes/auth.json"] [unique_id "amSsGk1EBH7DZx-NtEdIiQAATDA"]
+[Sat Jul 25 08:29:22.433074 2026] [mpm_event:notice] [pid 892:tid 892] AH00493: SIGUSR1 received.  Doing graceful restart
+AH00112: Warning: DocumentRoot [/home/admin/domains/dossy.world/public_html/test] does not exist
+AH00112: Warning: DocumentRoot [/home/admin/domains/dossy.world/public_html/test] does not exist
+[Sat Jul 25 08:29:23.040552 2026] [ssl:warn] [pid 892:tid 892] AH01909: localhost:443:0 server certificate does NOT include an ID which matches the server name
+[Sat Jul 25 08:29:23.042156 2026] [ssl:warn] [pid 892:tid 892] AH01909: www.example.com:443:0 server certificate does NOT include an ID which matches the server name
+[Sat Jul 25 08:29:23.043276 2026] [lbmethod_heartbeat:notice] [pid 892:tid 892] AH02282: No slotmem from mod_heartmonitor
+[Sat Jul 25 08:29:23.044470 2026] [mpm_event:notice] [pid 892:tid 892] AH00489: Apache/2.4.66 (Unix) OpenSSL/3.5.5 configured -- resuming normal operations
+[Sat Jul 25 08:29:23.044490 2026] [core:notice] [pid 892:tid 892] AH00094: Command line: '/usr/sbin/httpd -D FOREGROUND'
+[Sat Jul 25 08:29:40.637433 2026] [mpm_event:notice] [pid 892:tid 892] AH00492: caught SIGWINCH, shutting down gracefully
+[Sat Jul 25 08:32:50.162891 2026] [ssl:warn] [pid 1076287:tid 1076287] AH01909: localhost:443:0 server certificate does NOT include an ID which matches the server name
+[Sat Jul 25 08:32:50.164296 2026] [ssl:warn] [pid 1076287:tid 1076287] AH01909: www.example.com:443:0 server certificate does NOT include an ID which matches the server name
+[Sat Jul 25 08:32:50.165387 2026] [suexec:notice] [pid 1076287:tid 1076287] AH01232: suEXEC mechanism enabled (wrapper: /usr/sbin/suexec)
+[Sat Jul 25 08:32:50.165451 2026] [security2:notice] [pid 1076287:tid 1076287] ModSecurity for Apache/2.9.12 (http://www.modsecurity.org/) configured.
+[Sat Jul 25 08:32:50.165460 2026] [security2:notice] [pid 1076287:tid 1076287] ModSecurity: APR compiled version="1.7.6"; loaded version="1.7.6"
+[Sat Jul 25 08:32:50.165468 2026] [security2:notice] [pid 1076287:tid 1076287] ModSecurity: PCRE2 compiled version="10.40 "; loaded version="10.40 2022-04-14"
+[Sat Jul 25 08:32:50.165474 2026] [security2:notice] [pid 1076287:tid 1076287] ModSecurity: YAJL compiled version="2.1.0"
+[Sat Jul 25 08:32:50.165479 2026] [security2:notice] [pid 1076287:tid 1076287] ModSecurity: LIBXML compiled version="2.9.13"
+[Sat Jul 25 08:32:50.165484 2026] [security2:notice] [pid 1076287:tid 1076287] ModSecurity: Status engine is currently disabled, enable it by set SecStatusEngine to On.
+AH00112: Warning: DocumentRoot [/home/admin/domains/dossy.world/public_html/test] does not exist
+AH00112: Warning: DocumentRoot [/home/admin/domains/dossy.world/public_html/test] does not exist
+[Sat Jul 25 08:32:50.319623 2026] [ssl:warn] [pid 1076287:tid 1076287] AH01909: localhost:443:0 server certificate does NOT include an ID which matches the server name
+[Sat Jul 25 08:32:50.320902 2026] [ssl:warn] [pid 1076287:tid 1076287] AH01909: www.example.com:443:0 server certificate does NOT include an ID which matches the server name
+[Sat Jul 25 08:32:50.321725 2026] [lbmethod_heartbeat:notice] [pid 1076287:tid 1076287] AH02282: No slotmem from mod_heartmonitor
+[Sat Jul 25 08:32:50.366583 2026] [mpm_event:notice] [pid 1076287:tid 1076287] AH00489: Apache/2.4.66 (Unix) OpenSSL/3.5.5 configured -- resuming normal operations
+[Sat Jul 25 08:32:50.366700 2026] [core:notice] [pid 1076287:tid 1076287] AH00094: Command line: '/usr/sbin/httpd -D FOREGROUND'
+[root@mail crashbet]#
