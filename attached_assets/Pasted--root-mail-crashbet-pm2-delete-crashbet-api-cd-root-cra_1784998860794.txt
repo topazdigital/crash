@@ -1,0 +1,70 @@
+[root@mail crashbet]# pm2 delete crashbet-api
+cd /root/crashbet
+set -a && source .env.production && set +a
+PORT=3003 pm2 start node \
+  --name crashbet-api \
+  -- --enable-source-maps /root/crashbet/artifacts/api-server/dist/index.mjs
+pm2 save
+sleep 3
+pm2 status && ss -tlnp | grep 3003
+
+>>>> In-memory PM2 is out-of-date, do:
+>>>> $ pm2 update
+In memory PM2 version: 7.0.1
+Local PM2 version: 7.0.3
+
+[PM2] Applying action deleteProcessId on app [crashbet-api](ids: [ 14 ])
+[PM2] [crashbet-api](14) ✓
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 3  │ betcheza           │ fork     │ 69   │ online    │ 0%       │ 777.6mb  │
+│ 0  │ dossy              │ fork     │ 0    │ online    │ 5.3%     │ 27.2mb   │
+│ 2  │ naughtyhaughty-api │ fork     │ 0    │ online    │ 5.3%     │ 83.7mb   │
+│ 4  │ rdn-api            │ fork     │ 0    │ online    │ 0%       │ 200.8mb  │
+│ 1  │ wet3camp-api       │ fork     │ 0    │ online    │ 0%       │ 120.7mb  │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+
+>>>> In-memory PM2 is out-of-date, do:
+>>>> $ pm2 update
+In memory PM2 version: 7.0.1
+Local PM2 version: 7.0.3
+
+[PM2] Starting /usr/bin/node in fork_mode (1 instance)
+[PM2] Done.
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 3  │ betcheza           │ fork     │ 69   │ online    │ 0%       │ 810.7mb  │
+│ 15 │ crashbet-api       │ fork     │ 0    │ online    │ 0%       │ 17.9mb   │
+│ 0  │ dossy              │ fork     │ 0    │ online    │ 0%       │ 27.2mb   │
+│ 2  │ naughtyhaughty-api │ fork     │ 0    │ online    │ 0%       │ 83.7mb   │
+│ 4  │ rdn-api            │ fork     │ 0    │ online    │ 0%       │ 201.3mb  │
+│ 1  │ wet3camp-api       │ fork     │ 0    │ online    │ 0%       │ 121.1mb  │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+[PM2] Saving current process list...
+
+>>>> In-memory PM2 is out-of-date, do:
+>>>> $ pm2 update
+In memory PM2 version: 7.0.1
+Local PM2 version: 7.0.3
+
+[PM2] Successfully saved in /root/.pm2/dump.pm2
+
+>>>> In-memory PM2 is out-of-date, do:
+>>>> $ pm2 update
+In memory PM2 version: 7.0.1
+Local PM2 version: 7.0.3
+
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 3  │ betcheza           │ fork     │ 69   │ online    │ 0%       │ 810.7mb  │
+│ 15 │ crashbet-api       │ fork     │ 0    │ online    │ 0%       │ 91.2mb   │
+│ 0  │ dossy              │ fork     │ 0    │ online    │ 0%       │ 27.0mb   │
+│ 2  │ naughtyhaughty-api │ fork     │ 0    │ online    │ 0%       │ 83.9mb   │
+│ 4  │ rdn-api            │ fork     │ 0    │ online    │ 0%       │ 201.0mb  │
+│ 1  │ wet3camp-api       │ fork     │ 0    │ online    │ 0%       │ 121.1mb  │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+LISTEN 0      511                                       *:3003            *:*    users:(("node",pid=1968051,fd=19))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+[root@mail crashbet]#
