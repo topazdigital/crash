@@ -1,0 +1,87 @@
+[root@mail crashbet]# # 1. See the current domain settings DirectAdmin uses to generate httpd.conf
+cat /usr/local/directadmin/data/users/admin/domains/aviator.betcheza.co.ke
+
+# 2. Turn off PHP for this domain (removes the ProxyPass / 5001 from the generated config)
+sed -i 's/^php=.*/php=off/' \
+  /usr/local/directadmin/data/users/admin/domains/aviator.betcheza.co.ke
+
+# If there's no php= line at all, add it:
+grep -q "^php=" /usr/local/directadmin/data/users/admin/domains/aviator.betcheza.co.ke \
+  || echo "php=off" >> /usr/local/directadmin/data/users/admin/domains/aviator.betcheza.co.ke
+
+# 3. Rebuild the Apache config from DirectAdmin's templates (this is the official way)
+echo "action=rewrite&value=httpd" >> /usr/local/directadmin/data/task.queue.fast
+sleep 3
+# OR if that doesn't work:
+/usr/local/directadmin/directadmin d && sleep 2 && service directadmin restart
+
+# 4. Verify the 5001 ProxyPass is GONE from the regenerated config
+grep -A5 "aviator.betcheza.co.ke" /usr/local/directadmin/data/users/admin/httpd.conf \
+  | grep -i "ProxyPass"
+
+# 5. Now add the /api proxy correctly (once, persistently)
+cat > /usr/local/directadmin/data/users/admin/domains/aviator.betcheza.co.ke.conf << 'EOF'
+# CrashBet API proxy — survives DirectAdmin config rebuilds
+ProxyRequests Off
+ProxyPreserveHost On
+ProxyPass /api http://127.0.0.1:3001/api
+ProxyPassReverse /api http://127.0.0.1:3001/api
+EOF
+
+pm2 statusble-source-maps /root/crashbet/artifacts/api-server/dist/index.mjsco.ke" https://127.0.0.1/
+cat: /usr/local/directadmin/data/users/admin/domains/aviator.betcheza.co.ke: No such file or directory
+sed: can't read /usr/local/directadmin/data/users/admin/domains/aviator.betcheza.co.ke: No such file or directory
+grep: /usr/local/directadmin/data/users/admin/domains/aviator.betcheza.co.ke: No such file or directory
+2026/07/25 10:45:00 fatal creating main HTTP server error=listen tcp :2222: bind: address already in use port=2222
+The service command supports only basic LSB actions (start, stop, restart, try-restart, reload, reload-or-restart, try-reload-or-restart, force-reload, status, condrestart). For other actions, please try to use systemctl.
+HTTP:  200
+HTTPS: 200
+
+>>>> In-memory PM2 is out-of-date, do:
+>>>> $ pm2 update
+In memory PM2 version: 7.0.1
+Local PM2 version: 7.0.3
+
+ 1328115
+>>>> In-memory PM2 is out-of-date, do:
+>>>> $ pm2 update
+In memory PM2 version: 7.0.1
+Local PM2 version: 7.0.3
+
+[PM2] Starting /usr/bin/node in fork_mode (1 instance)
+[PM2] Done.
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 3  │ betcheza           │ fork     │ 68   │  │ 0%       │ 0b       │
+│ 8  │ crashbet-api       │ fork     │ 0    │ online    │ 0%       │ 18.8mb   │
+│ 0  │ dossy              │ fork     │ 0    │ online    │ 0%       │ 22.6mb   │
+│ 2  │ naughtyhaughty-api │ fork     │ 0    │ online    │ 0%       │ 85.5mb   │
+│ 4  │ rdn-api            │ fork     │ 0    │ online    │ 0%       │ 184.6mb  │
+│ 1  │ wet3camp-api       │ fork     │ 0    │ online    │ 0%       │ 119.7mb  │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+[PM2] Saving current process list...
+
+>>>> In-memory PM2 is out-of-date, do:
+>>>> $ pm2 update
+In memory PM2 version: 7.0.1
+Local PM2 version: 7.0.3
+
+[PM2] Successfully saved in /root/.pm2/dump.pm2
+
+>>>> In-memory PM2 is out-of-date, do:
+>>>> $ pm2 update
+In memory PM2 version: 7.0.1
+Local PM2 version: 7.0.3
+
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 3  │ betcheza           │ fork     │ 69   │ online    │ 50%      │ 113.4mb  │
+│ 8  │ crashbet-api       │ fork     │ 0    │ online    │ 25%      │ 447.1mb  │
+│ 0  │ dossy              │ fork     │ 0    │ online    │ 0%       │ 21.9mb   │
+│ 2  │ naughtyhaughty-api │ fork     │ 0    │ online    │ 0%       │ 86.5mb   │
+│ 4  │ rdn-api            │ fork     │ 0    │ online    │ 0%       │ 184.6mb  │
+│ 1  │ wet3camp-api       │ fork     │ 0    │ online    │ 0%       │ 119.7mb  │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+[root@mail crashbet]#
