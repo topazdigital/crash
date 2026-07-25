@@ -1,0 +1,50 @@
+[root@mail crashbet]# pm2 logs crashbet-api --lines 30 --nostream
+
+>>>> In-memory PM2 is out-of-date, do:
+>>>> $ pm2 update
+In memory PM2 version: 7.0.1
+Local PM2 version: 7.0.3
+
+[TAILING] Tailing last 30 lines for [crashbet-api] process (change the value with --lines option)
+/root/.pm2/logs/crashbet-api-out.log last 30 lines:
+14|crashbe | dules/.pnpm/express@5.2.1/node_modules/express/lib/application.js:605:24)\n    at <anonymous> (/root/crashbet/artifacts/api-server/src/index.ts:18:5)\n    at ModuleJob.run (node:internal/modules/esm/module_job:325:25)\n    at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)","code":"EADDRINUSE","errno":-98,"syscall":"listen","address":"::","port":3001},"msg":"Error listening on port"}
+14|crashbe | {"level":50,"time":1784998693480,"pid":1960795,"hostname":"mail.betcheza.co.ke","err":{"type":"Error","message":"listen EADDRINUSE: address already in use :::3001","stack":"Error: listen EADDRINUSE: address already in use :::3001\n    at Server.setupListenHandle [as _listen2] (node:net:1908:16)\n    at listenInCluster (node:net:1965:12)\n    at Server.listen (node:net:2067:7)\n    at Function.listen (/root/crashbet/node_modules/.pnpm/express@5.2.1/node_modules/express/lib/application.js:605:24)\n    at <anonymous> (/root/crashbet/artifacts/api-server/src/index.ts:18:5)\n    at ModuleJob.run (node:internal/modules/esm/module_job:325:25)\n    at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)","code":"EADDRINUSE","errno":-98,"syscall":"listen","address":"::","port":3001},"msg":"Error listening on port"}
+14|crashbe | {"level":50,"time":1784998694786,"pid":1960857,"hostname":"mail.betcheza.co.ke","err":{"type":"Error","message":"listen EADDRINUSE: address already in use :::3001","stack":"Error: listen EADDRINUSE: address already in use :::3001\n    at Server.setupListenHandle [as _listen2] (node:net:1908:16)\n    at listenInCluster (node:net:1965:12)\n    at Server.listen (node:net:2067:7)\n    at Function.listen (/root/crashbet/node_modules/.pnpm/express@5.2.1/node_modules/express/lib/application.js:605:24)\n    at <anonymous> (/root/crashbet/artifacts/api-server/src/index.ts:18:5)\n    at ModuleJob.run (node:internal/modules/esm/module_job:325:25)\n    at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)","code":"EADDRINUSE","errno":-98,"syscall":"listen","address":"::","port":3001},"msg":"Error listening on port"}
+14|crashbe | {"level":50,"time":1784998696769,"pid":1960915,"hostname":"mail.betcheza.co.ke","err":{"type":"Error","message":"listen EADDRINUSE: address already in use :::3001","stack":"Error: listen EADDRINUSE: address already in use :::3001\n    at Server.setupListenHandle [as _listen2] (node:net:1908:16)\n    at listenInCluster (node:net:1965:12)\n    at Server.listen (node:net:2067:7)\n    at Function.listen (/root/crashbet/node_modules/.pnpm/express@5.2.1/node_modules/express/lib/application.js:605:24)\n    at <anonymous> (/root/crashbet/artifacts/api-server/src/index.ts:18:5)\n    at ModuleJob.run (node:internal/modules/esm/module_job:325:25)\n    at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)","code":"EADDRINUSE","errno":-98,"syscall":"listen","address":"::","port":3001},"msg":"Error listening on port"}
+14|crashbe | {"level":50,"time":1784998698561,"pid":1960981,"hostname":"mail.betcheza.co.ke","err":{"type":"Error","message":"listen EADDRINUSE: address already in use :::3001","stack":"Error: listen EADDRINUSE: address already in use :::3001\n    at Server.setupListenHandle [as _listen2] (node:net:1908:16)\n    at listenInCluster (node:net:1965:12)\n    at Server.listen (node:net:2067:7)\n    at Function.listen (/root/crashbet/node_modules/.pnpm/express@5.2.1/node_modules/express/lib/application.js:605:24)\n    at <anonymous> (/root/crashbet/artifacts/api-server/src/index.ts:18:5)\n    at ModuleJob.run (node:internal/modules/esm/module_job:325:25)\n    at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)","code":"EADDRINUSE","errno":-98,"syscall":"listen","address":"::","port":3001},"msg":"Error listening on port"}
+14|crashbe | {"level":50,"time":1784998701235,"pid":1961038,"hostname":"mail.betcheza.co.ke","err":{"type":"Error","message":"listen EADDRINUSE: address already in use :::3001","stack":"Error: listen EADDRINUSE: address already in use :::3001\n    at Server.setupListenHandle [as _listen2] (node:net:1908:16)\n    at listenInCluster (node:net:1965:12)\n    at Server.listen (node:net:2067:7)\n    at Function.listen (/root/crashbet/node_modules/.pnpm/express@5.2.1/node_modules/express/lib/application.js:605:24)\n    at <anonymous> (/root/crashbet/artifacts/api-server/src/index.ts:18:5)\n    at ModuleJob.run (node:internal/modules/esm/module_job:325:25)\n    at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)","code":"EADDRINUSE","errno":-98,"syscall":"listen","address":"::","port":3001},"msg":"Error listening on port"}
+14|crashbe | {"level":50,"time":1784998703058,"pid":1961103,"hostname":"mail.betcheza.co.ke","err":{"type":"Error","message":"listen EADDRINUSE: address already in use :::3001","stack":"Error: listen EADDRINUSE: address already in use :::3001\n    at Server.setupListenHandle [as _listen2] (node:net:1908:16)\n    at listenInCluster (node:net:1965:12)\n    at Server.listen (node:net:2067:7)\n    at Function.listen (/root/crashbet/node_modules/.pnpm/express@5.2.1/node_modules/express/lib/application.js:605:24)\n    at <anonymous> (/root/crashbet/artifacts/api-server/src/index.ts:18:5)\n    at ModuleJob.run (node:internal/modules/esm/module_job:325:25)\n    at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)","code":"EADDRINUSE","errno":-98,"syscall":"listen","address":"::","port":3001},"msg":"Error listening on port"}
+
+/root/.pm2/logs/crashbet-api-error.log last 30 lines:
+14|crashbe |     at <anonymous> (/root/crashbet/lib/db/src/index.ts:7:9)
+14|crashbe |     at ModuleJob.run (node:internal/modules/esm/module_job:325:25)
+14|crashbe |     at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)
+14|crashbe |     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+14|crashbe |
+14|crashbe | Node.js v20.20.2
+14|crashbe | /root/crashbet/lib/db/src/index.ts:7
+14|crashbe |   throw new Error(
+14|crashbe |         ^
+14|crashbe |
+14|crashbe |
+14|crashbe | Error: MYSQL_URL must be set to a MySQL connection string (mysql://user:password@host:3306/database).
+14|crashbe |     at <anonymous> (/root/crashbet/lib/db/src/index.ts:7:9)
+14|crashbe |     at ModuleJob.run (node:internal/modules/esm/module_job:325:25)
+14|crashbe |     at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)
+14|crashbe |     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+14|crashbe |
+14|crashbe | Node.js v20.20.2
+14|crashbe | /root/crashbet/lib/db/src/index.ts:7
+14|crashbe |   throw new Error(
+14|crashbe |         ^
+14|crashbe |
+14|crashbe |
+14|crashbe | Error: MYSQL_URL must be set to a MySQL connection string (mysql://user:password@host:3306/database).
+14|crashbe |     at <anonymous> (/root/crashbet/lib/db/src/index.ts:7:9)
+14|crashbe |     at ModuleJob.run (node:internal/modules/esm/module_job:325:25)
+14|crashbe |     at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)
+14|crashbe |     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+14|crashbe |
+14|crashbe | Node.js v20.20.2
+
+[root@mail crashbet]#
