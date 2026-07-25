@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "PantaneAX"
+version = "1.0.0"
+id = "artifacts/pantaneax"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19828
+
+[services.development]
+run = "pnpm --filter @workspace/pantaneax run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/pantaneax", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/pantaneax/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19828"
+BASE_PATH = "/"
