@@ -13,9 +13,9 @@ interface BetDeckProps {
   multiplier: number;
   balance: number;
   isAuthenticated: boolean;
-  onBet: (amount: number) => boolean;
-  onCashout: (multiplier: number) => void;
-  onLoss: () => void;
+  onBet: (amount: number) => Promise<boolean>;
+  onCashout: (multiplier: number) => Promise<void>;
+  onLoss: () => Promise<void>;
 }
 
 export default function BetDeck({ label, phase, multiplier, balance, isAuthenticated, onBet, onCashout, onLoss }: BetDeckProps) {
@@ -33,18 +33,18 @@ export default function BetDeck({ label, phase, multiplier, balance, isAuthentic
   useEffect(() => { autoBetRef.current = autoBet; }, [autoBet]);
   useEffect(() => { autoCashoutRef.current = parseFloat(autoCashout) || 2.0; }, [autoCashout]);
 
-  const handleBet = useCallback(() => {
+  const handleBet = useCallback(async () => {
     const amount = parseFloat(betAmount);
     if (isNaN(amount) || amount <= 0) return;
-    if (onBet(amount)) {
+    if (await onBet(amount)) {
       setActiveBet(amount);
       setCashedOut(false);
     }
   }, [betAmount, onBet]);
 
-  const handleCashout = useCallback(() => {
+  const handleCashout = useCallback(async () => {
     if (activeBet && !cashedOut) {
-      onCashout(multiplier);
+      await onCashout(multiplier);
       setCashedOut(true);
     }
   }, [activeBet, cashedOut, multiplier, onCashout]);
@@ -54,17 +54,19 @@ export default function BetDeck({ label, phase, multiplier, balance, isAuthentic
     if (phase === 'running' && activeBet && !cashedOut && autoBetRef.current) {
       const target = autoCashoutRef.current;
       if (multiplier >= target) {
-        onCashout(multiplier);
+        void onCashout(multiplier);
         setCashedOut(true);
       }
     }
   }, [multiplier, phase, activeBet, cashedOut, onCashout]);
 
   // Auto-reset on crash
-  if (phase === 'crashed' && activeBet && !cashedOut) {
-    onLoss();
-    setActiveBet(null);
-  }
+  useEffect(() => {
+    if (phase === 'crashed' && activeBet && !cashedOut) {
+      void onLoss();
+      setActiveBet(null);
+    }
+  }, [phase, activeBet, cashedOut, onLoss]);
 
   // Reset after cashout when new round starts
   if (phase === 'waiting' && activeBet && cashedOut) {
@@ -75,11 +77,11 @@ export default function BetDeck({ label, phase, multiplier, balance, isAuthentic
   // Auto-bet: place bet automatically when waiting phase starts
   useEffect(() => {
     if (phase === 'waiting' && autoBetRef.current && !activeBet) {
-      const timer = setTimeout(() => {
+      const timer = setTimeout(async () => {
         if (autoBetRef.current) {
           const amount = parseFloat(betAmount);
           if (!isNaN(amount) && amount > 0 && amount <= balance) {
-            if (onBet(amount)) {
+            if (await onBet(amount)) {
               setActiveBet(amount);
               setCashedOut(false);
             }

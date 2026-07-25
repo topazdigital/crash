@@ -1,44 +1,54 @@
-# [Project name]
+# PantaneAX
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+PantaneAX is a production-oriented crash game website with Clerk accounts, a MySQL-backed wallet/activity API, and a protected administrator dashboard.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/api-server run dev` — run the API server (port 8080)
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- `pnpm --filter @workspace/db run push` — push DB schema changes against MySQL
+- Required secret: `MYSQL_URL` — MySQL connection string (`mysql://user:password@host:3306/database`)
+- Required secret: `CLERK_PUBLISHABLE_KEY` / `CLERK_SECRET_KEY` — provisioned by managed authentication
+- Required environment variable: `ADMIN_EMAILS` — comma-separated emails that receive the administrator role on first sign-in
 
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
 - API: Express 5
-- DB: PostgreSQL + Drizzle ORM
+- DB: MySQL + Drizzle ORM (`mysql2`)
 - Validation: Zod (`zod/v4`), `drizzle-zod`
 - API codegen: Orval (from OpenAPI spec)
 - Build: esbuild (CJS bundle)
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `lib/db/src/schema/index.ts` — MySQL tables for users, wallets, transactions, rounds, and bets
+- `artifacts/api-server/src/routes/` — account, game, health, and admin API routes
+- `artifacts/pantaneax/src/pages/Admin.tsx` — protected administrator dashboard
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Clerk owns browser authentication; passwords are never stored in the browser or application database.
+- A local user row is provisioned on the first authenticated API request and is linked by Clerk user ID.
+- Administrator access is granted only to emails listed in `ADMIN_EMAILS`; all admin routes enforce the role server-side.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Public visitors can view the game and sign in or register.
+- Authenticated players use a persistent MySQL wallet and transaction history.
+- Administrators can review users, balances, bet totals, payouts, and recent activity.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- User requires MySQL because their production server does not support PostgreSQL.
+- User wants production behavior and no demo/local-storage credentials or demo mode.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Add `MYSQL_URL` and `ADMIN_EMAILS` before starting the API; the API intentionally fails without a database connection.
+- Apply schema changes with the database package before using account, wallet, game, or admin routes.
 
 ## Pointers
 

@@ -10,48 +10,62 @@ import TransactionList from '@/components/TransactionList';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function Index() {
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, logout, isAuthenticated, isLoading: authLoading } = useAuth();
   const game = useGameEngine();
-  const wallet = useWallet();
-  const lastBet1 = useRef(0);
-  const lastBet2 = useRef(0);
+  const wallet = useWallet(isAuthenticated);
+  const lastBet1 = useRef<{ id: string; amount: number } | null>(null);
+  const lastBet2 = useRef<{ id: string; amount: number } | null>(null);
 
-  const handleBet1 = useCallback((amount: number) => {
-    const ok = wallet.placeBet(amount);
-    if (ok) lastBet1.current = amount;
-    return ok;
+  const handleBet1 = useCallback(async (amount: number) => {
+    const id = await wallet.placeBet(amount, crypto.randomUUID());
+    if (id) lastBet1.current = { id, amount };
+    return Boolean(id);
   }, [wallet]);
 
-  const handleBet2 = useCallback((amount: number) => {
-    const ok = wallet.placeBet(amount);
-    if (ok) lastBet2.current = amount;
-    return ok;
+  const handleBet2 = useCallback(async (amount: number) => {
+    const id = await wallet.placeBet(amount, crypto.randomUUID());
+    if (id) lastBet2.current = { id, amount };
+    return Boolean(id);
   }, [wallet]);
 
-  const handleCashout1 = useCallback((multiplier: number) => {
-    wallet.creditWin(lastBet1.current * multiplier, multiplier);
+  const handleCashout1 = useCallback(async (multiplier: number) => {
+    if (lastBet1.current) {
+      await wallet.settleBet(lastBet1.current.id, multiplier, "win");
+      lastBet1.current = null;
+    }
   }, [wallet]);
 
-  const handleCashout2 = useCallback((multiplier: number) => {
-    wallet.creditWin(lastBet2.current * multiplier, multiplier);
+  const handleCashout2 = useCallback(async (multiplier: number) => {
+    if (lastBet2.current) {
+      await wallet.settleBet(lastBet2.current.id, multiplier, "win");
+      lastBet2.current = null;
+    }
   }, [wallet]);
 
-  const handleLoss1 = useCallback(() => {
-    wallet.recordLoss(lastBet1.current);
-  }, [wallet]);
+  const handleLoss1 = useCallback(async () => {
+    if (lastBet1.current) {
+      await wallet.settleBet(lastBet1.current.id, game.multiplier, "loss");
+      lastBet1.current = null;
+    }
+  }, [game.multiplier, wallet]);
 
-  const handleLoss2 = useCallback(() => {
-    wallet.recordLoss(lastBet2.current);
-  }, [wallet]);
+  const handleLoss2 = useCallback(async () => {
+    if (lastBet2.current) {
+      await wallet.settleBet(lastBet2.current.id, game.multiplier, "loss");
+      lastBet2.current = null;
+    }
+  }, [game.multiplier, wallet]);
+
+  if (authLoading || (isAuthenticated && wallet.loading)) {
+    return <div className="min-h-screen grid place-items-center bg-background text-muted-foreground">Loading account…</div>;
+  }
 
   return (
     <div className="min-h-screen bg-background">
       <TopBar
         user={user}
         balance={wallet.balance}
-        mode={wallet.mode}
         onLogout={logout}
-        onResetDemo={wallet.resetDemo}
       />
 
       <main className="container mx-auto px-4 py-4 max-w-6xl">
@@ -108,9 +122,7 @@ export default function Index() {
               <TransactionList transactions={wallet.transactions} />
             </TabsContent>
             <TabsContent value="all" className="mt-4">
-              <div className="text-center py-8 text-muted-foreground text-sm">
-                Multiplayer bets will appear here
-              </div>
+              <div className="text-center py-8 text-muted-foreground text-sm">Live activity is available to authenticated players.</div>
             </TabsContent>
           </Tabs>
         </div>

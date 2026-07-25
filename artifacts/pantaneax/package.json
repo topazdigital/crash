@@ -76,6 +76,8 @@
     "zod": "catalog:"
   },
   "dependencies": {
+    "@clerk/react": "^6.12.7",
+    "@clerk/themes": "^2.4.57",
     "react-router-dom": "^7.18.1",
     "vitest": "^4.1.10"
   }

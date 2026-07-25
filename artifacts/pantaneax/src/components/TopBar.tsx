@@ -1,17 +1,15 @@
 import { Button } from '@/components/ui/button';
 import { User } from '@/hooks/useAuth';
-import { Plane, LogOut, Wallet, RefreshCw, LogIn } from 'lucide-react';
+import { Plane, LogOut, Wallet, LogIn, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface TopBarProps {
   user: User | null;
   balance: number;
-  mode: 'demo' | 'real';
   onLogout: () => void;
-  onResetDemo: () => void;
 }
 
-export default function TopBar({ user, balance, mode, onLogout, onResetDemo }: TopBarProps) {
+export default function TopBar({ user, balance, onLogout }: TopBarProps) {
   return (
     <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto flex items-center justify-between h-14 px-4">
@@ -30,17 +28,15 @@ export default function TopBar({ user, balance, mode, onLogout, onResetDemo }: T
               <span className="text-xs text-muted-foreground">KES</span>
             </div>
 
-            <span className="px-2 py-0.5 rounded text-xs font-bold uppercase bg-primary/20 text-primary">
-              {mode}
-            </span>
-
-            {mode === 'demo' && (
-              <Button variant="ghost" size="sm" onClick={onResetDemo} title="Reset demo balance">
-                <RefreshCw className="w-4 h-4" />
-              </Button>
-            )}
-
             <span className="text-sm text-muted-foreground hidden sm:inline">{user.name}</span>
+
+            {user.role === "admin" && (
+              <Link to="/admin">
+                <Button variant="ghost" size="sm" title="Admin panel">
+                  <ShieldCheck className="w-4 h-4" />
+                </Button>
+              </Link>
+            )}
 
             <Button variant="ghost" size="sm" onClick={onLogout}>
               <LogOut className="w-4 h-4" />
