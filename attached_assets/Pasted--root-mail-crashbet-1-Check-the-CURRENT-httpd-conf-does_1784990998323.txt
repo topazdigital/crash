@@ -1,0 +1,61 @@
+[root@mail crashbet]# # 1. Check the CURRENT httpd.conf — does ProxyPass / 5001 still exist for aviator?
+grep -n "ProxyPass\|aviator" /usr/local/directadmin/data/users/admin/httpd.conf \
+  | grep -A2 -B2 "aviator" | head -30
+
+# 2. Check what processes are ACTUALLY listening on ports 80 and 443
+#    (tells us if something other than Apache is intercepting browser traffic)
+ss -tlnp | grep -E ':80 |:443 '
+
+# 3. Check the error log for NEW entries (after 16:00 today)
+tail -20 /var/log/httpd/domains/betcheza.co.ke.aviator.error.log
+
+# 4. Also check if something is on port 5001
+ss -tlnp | grep ':5001'
+237:ProxyPass /api http://127.0.0.1:3001/api
+238:ProxyPassReverse /api http://127.0.0.1:3001/api
+248:    ServerName www.aviator.betcheza.co.ke
+249:    ServerAlias www.aviator.betcheza.co.ke aviator.betcheza.co.ke
+251:    DocumentRoot "/home/admin/domains/aviator.betcheza.co.ke/public_html"
+252:    ScriptAlias /cgi-bin/ "/home/admin/domains/aviator.betcheza.co.ke/public_html/cgi-bin/"
+260:    CustomLog /var/log/httpd/domains/betcheza.co.ke.aviator.bytes bytes
+261:    CustomLog /var/log/httpd/domains/betcheza.co.ke.aviator.log combined
+262:    ErrorLog /var/log/httpd/domains/betcheza.co.ke.aviator.error.log
+263:    <Directory "/home/admin/domains/aviator.betcheza.co.ke/public_html">
+279:ProxyPass /.well-known !
+280:ProxyPass /api http://127.0.0.1:3001/api
+281:ProxyPassReverse /api http://127.0.0.1:3001/api
+292:    SSLCertificateFile /usr/local/directadmin/data/users/admin/domains/aviator.betcheza.co.ke.cert.combined
+293:    SSLCertificateKeyFile /usr/local/directadmin/data/users/admin/domains/aviator.betcheza.co.ke.key
+294:    ServerName www.aviator.betcheza.co.ke
+295:    ServerAlias www.aviator.betcheza.co.ke aviator.betcheza.co.ke
+297:    DocumentRoot "/home/admin/domains/aviator.betcheza.co.ke/public_html"
+298:    ScriptAlias /cgi-bin/ "/home/admin/domains/aviator.betcheza.co.ke/public_html/cgi-bin/"
+301:    CustomLog /var/log/httpd/domains/betcheza.co.ke.aviator.bytes bytes
+302:    CustomLog /var/log/httpd/domains/betcheza.co.ke.aviator.log combined
+303:    ErrorLog /var/log/httpd/domains/betcheza.co.ke.aviator.error.log
+304:    <Directory "/home/admin/domains/aviator.betcheza.co.ke/public_html">
+345:    ProxyPassMatch "^/\.well-known/autoconfig/mail/config-v1\.1\.xml$" "unix:/usr/local/directadmin/shared/internal.sock|http://localhost"
+374:    ProxyPassMatch "^/\.well-known/autoconfig/mail/config-v1\.1\.xml$" "unix:/usr/local/directadmin/shared/internal.sock|http://localhost"
+LISTEN 0      511                                       *:443             *:*    users:(("httpd",pid=1076337,fd=8),("httpd",pid=1076311,fd=8),("httpd",pid=1076287,fd=8))                                                                                                                                                                                                                                                                                                                                                                                                                                               
+LISTEN 0      511                                       *:80              *:*    users:(("httpd",pid=1076337,fd=4),("httpd",pid=1076311,fd=4),("httpd",pid=1076287,fd=4))                                                                                                                                                                                                                                                                                                                                                                                                                                               
+[Sat Jul 25 09:43:56.458372 2026] [proxy:error] [pid 1076311:tid 1076393] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:43:56.458497 2026] [proxy_http:error] [pid 1076311:tid 1076393] [remote 102.203.101.155:55450] AH01114: HTTP: failed to make connection to backend: 127.0.0.1
+[Sat Jul 25 09:43:56.784026 2026] [proxy:error] [pid 1076311:tid 1076567] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:43:56.784162 2026] [proxy_http:error] [pid 1076311:tid 1076567] [remote 102.203.101.155:55450] AH01114: HTTP: failed to make connection to backend: 127.0.0.1, referer: https://aviator.betcheza.co.ke/
+[Sat Jul 25 09:44:32.778101 2026] [proxy:error] [pid 1076311:tid 1076353] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:44:32.778409 2026] [proxy_http:error] [pid 1076311:tid 1076353] [remote 102.203.101.155:49021] AH01114: HTTP: failed to make connection to backend: 127.0.0.1
+[Sat Jul 25 09:44:33.039221 2026] [proxy:error] [pid 1076311:tid 1076617] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:44:33.039355 2026] [proxy_http:error] [pid 1076311:tid 1076617] [remote 102.203.101.155:49021] AH01114: HTTP: failed to make connection to backend: 127.0.0.1, referer: https://aviator.betcheza.co.ke/
+[Sat Jul 25 10:42:18.998474 2026] [proxy:error] [pid 1076337:tid 1076684] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 10:42:18.998771 2026] [proxy_http:error] [pid 1076337:tid 1076684] [remote 102.203.101.155:64340] AH01114: HTTP: failed to make connection to backend: 127.0.0.1
+[Sat Jul 25 10:42:19.257987 2026] [proxy:error] [pid 1076337:tid 1076677] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 10:42:19.258134 2026] [proxy_http:error] [pid 1076337:tid 1076677] [remote 102.203.101.155:64340] AH01114: HTTP: failed to make connection to backend: 127.0.0.1, referer: https://aviator.betcheza.co.ke/
+[Sat Jul 25 10:45:14.950146 2026] [proxy:error] [pid 1076311:tid 1076395] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 10:45:14.951363 2026] [proxy_http:error] [pid 1076311:tid 1076395] [remote 102.203.101.155:64800] AH01114: HTTP: failed to make connection to backend: 127.0.0.1
+[Sat Jul 25 10:45:15.203900 2026] [proxy:error] [pid 1076311:tid 1076359] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 10:45:15.204055 2026] [proxy_http:error] [pid 1076311:tid 1076359] [remote 102.203.101.155:64800] AH01114: HTTP: failed to make connection to backend: 127.0.0.1, referer: https://aviator.betcheza.co.ke/
+[Sat Jul 25 10:45:39.216227 2026] [proxy:error] [pid 1076337:tid 1076742] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 10:45:39.216420 2026] [proxy_http:error] [pid 1076337:tid 1076742] [remote 102.203.101.155:64878] AH01114: HTTP: failed to make connection to backend: 127.0.0.1
+[Sat Jul 25 10:45:39.472096 2026] [proxy:error] [pid 1076337:tid 1076740] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 10:45:39.472277 2026] [proxy_http:error] [pid 1076337:tid 1076740] [remote 102.203.101.155:64878] AH01114: HTTP: failed to make connection to backend: 127.0.0.1, referer: https://aviator.betcheza.co.ke/
+[root@mail crashbet]#
