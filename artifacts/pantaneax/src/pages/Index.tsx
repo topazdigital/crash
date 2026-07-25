@@ -17,16 +17,16 @@ export default function Index() {
   const lastBet2 = useRef<{ id: string; amount: number } | null>(null);
 
   const handleBet1 = useCallback(async (amount: number) => {
-    const id = await wallet.placeBet(amount, crypto.randomUUID());
+    const id = await wallet.placeBet(amount, game.roundId || crypto.randomUUID());
     if (id) lastBet1.current = { id, amount };
     return Boolean(id);
-  }, [wallet]);
+  }, [wallet, game.roundId]);
 
   const handleBet2 = useCallback(async (amount: number) => {
-    const id = await wallet.placeBet(amount, crypto.randomUUID());
+    const id = await wallet.placeBet(amount, game.roundId || crypto.randomUUID());
     if (id) lastBet2.current = { id, amount };
     return Boolean(id);
-  }, [wallet]);
+  }, [wallet, game.roundId]);
 
   const handleCashout1 = useCallback(async (multiplier: number) => {
     if (lastBet1.current) {

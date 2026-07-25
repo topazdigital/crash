@@ -11,6 +11,8 @@ import {
 import { requireUser } from "../middlewares/auth";
 
 const router: IRouter = Router();
+// Note: GET /api/game/stream (SSE) is mounted in app.ts BEFORE Clerk middleware
+// so it doesn't require authentication and works even without CLERK_SECRET_KEY.
 
 function amount(value: unknown) {
   const parsed = typeof value === "number" ? value : Number(value);
