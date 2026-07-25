@@ -28,6 +28,9 @@ source "$REPO_DIR/.env.production"
 set +a
 
 echo "==> [4/6] Building React frontend..."
+# BASE_PATH and PORT are required by vite.config.ts at build time
+export BASE_PATH="/"
+export PORT=3000
 pnpm --filter @workspace/pantaneax run build
 
 echo "==> [5/6] Deploying frontend to public_html..."
