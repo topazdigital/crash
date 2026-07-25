@@ -53,6 +53,15 @@ app.get("/api/game/stream", (req, res) => {
   res.setHeader("X-Accel-Buffering", "no");
   res.flushHeaders();
 
+  // Apache's mod_proxy buffers the first ~8 KB of a proxied response before
+  // forwarding anything downstream.  Send a large comment block right away to
+  // fill that buffer and force Apache into streaming mode — without this the
+  // client gets the initial SSE snapshot but all subsequent events are held
+  // until the buffer fills naturally (which never happens for low-traffic SSE).
+  // 8192 x's + ": " + "\n\n" = well over 8 KB, with margin for Apache variants.
+  const pad = `: ${"x".repeat(8192)}\n\n`;
+  res.write(pad);
+
   const clientId = randomUUID();
   const unsubscribe = gameEngine.subscribe(clientId, res);
   req.on("close", unsubscribe);
