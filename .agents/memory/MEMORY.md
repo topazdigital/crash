@@ -1,0 +1,1 @@
+- [MySQL database lock](mysql-lock.md) — database is MySQL; agents must never change the database, schema, driver, or dialect.
