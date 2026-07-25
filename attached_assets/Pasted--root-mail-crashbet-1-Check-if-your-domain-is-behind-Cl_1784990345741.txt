@@ -1,0 +1,195 @@
+[root@mail crashbet]# # 1. Check if your domain is behind Cloudflare or a CDN
+#    (if the resolved IP is different from 157.250.205.180, that's the issue)
+dig +short aviator.betcheza.co.ke
+
+# 2. Check the actual Apache error log at the moment you hit the site in browser
+tail -50 /var/log/httpd/domains/betcheza.co.ke.aviator.error.log
+
+# 3. Check if DirectAdmin has a SEPARATE custom vhost config file for this domain
+#    (this file survives httpd regenerations — the main httpd.conf does NOT)
+ls -la /usr/local/directadmin/data/users/admin/domains/
+cat /usr/local/directadmin/data/users/admin/domains/aviator.betcheza.co.ke.conf 2>/dev/null \
+  || echo "No custom domain conf file"
+
+# 4. Confirm what Apache config is actually loaded
+grep -r "aviator" /etc/httpd/conf/ 2>/dev/null | grep -v ".bak"
+157.250.205.180
+[Sat Jul 25 09:13:35.341254 2026] [proxy:error] [pid 1076311:tid 1076562] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:13:35.341434 2026] [proxy_http:error] [pid 1076311:tid 1076562] [remote 85.137.57.233:51392] AH01114: HTTP: failed to make connection to backend: 127.0.0.1
+[Sat Jul 25 09:13:38.706609 2026] [proxy:error] [pid 1076311:tid 1076500] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:13:38.706758 2026] [proxy_http:error] [pid 1076311:tid 1076500] [remote 85.137.57.233:51396] AH01114: HTTP: failed to make connection to backend: 127.0.0.1
+[Sat Jul 25 09:13:40.781919 2026] [proxy:error] [pid 1076311:tid 1076564] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:13:40.782038 2026] [proxy_http:error] [pid 1076311:tid 1076564] [remote 85.137.57.233:43582] AH01114: HTTP: failed to make connection to backend: 127.0.0.1
+[Sat Jul 25 09:22:33.685969 2026] [proxy:error] [pid 1076311:tid 1076515] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:22:33.686181 2026] [proxy_http:error] [pid 1076311:tid 1076515] [remote 102.203.101.155:52984] AH01114: HTTP: failed to make connection to backend: 127.0.0.1
+[Sat Jul 25 09:22:33.946688 2026] [proxy:error] [pid 1076311:tid 1076344] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:22:33.946804 2026] [proxy_http:error] [pid 1076311:tid 1076344] [remote 102.203.101.155:52984] AH01114: HTTP: failed to make connection to backend: 127.0.0.1, referer: https://aviator.betcheza.co.ke/
+[Sat Jul 25 09:26:26.717417 2026] [proxy:error] [pid 1076337:tid 1076771] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:26:26.717712 2026] [proxy_http:error] [pid 1076337:tid 1076771] [remote 102.203.101.155:46459] AH01114: HTTP: failed to make connection to backend: 127.0.0.1
+[Sat Jul 25 09:26:26.975241 2026] [proxy:error] [pid 1076337:tid 1076768] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:26:26.975391 2026] [proxy_http:error] [pid 1076337:tid 1076768] [remote 102.203.101.155:46459] AH01114: HTTP: failed to make connection to backend: 127.0.0.1, referer: https://aviator.betcheza.co.ke/
+[Sat Jul 25 09:27:56.301257 2026] [proxy:error] [pid 1076311:tid 1076350] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:27:56.301448 2026] [proxy_http:error] [pid 1076311:tid 1076350] [remote 102.203.101.155:46733] AH01114: HTTP: failed to make connection to backend: 127.0.0.1
+[Sat Jul 25 09:27:56.565648 2026] [proxy:error] [pid 1076311:tid 1076395] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:27:56.565767 2026] [proxy_http:error] [pid 1076311:tid 1076395] [remote 102.203.101.155:46733] AH01114: HTTP: failed to make connection to backend: 127.0.0.1, referer: https://aviator.betcheza.co.ke/
+[Sat Jul 25 09:30:37.196260 2026] [proxy:error] [pid 1076311:tid 1076471] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:30:37.196596 2026] [proxy_http:error] [pid 1076311:tid 1076471] [remote 102.203.101.155:54094] AH01114: HTTP: failed to make connection to backend: 127.0.0.1
+[Sat Jul 25 09:30:37.453692 2026] [proxy:error] [pid 1076311:tid 1076476] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:30:37.453855 2026] [proxy_http:error] [pid 1076311:tid 1076476] [remote 102.203.101.155:54094] AH01114: HTTP: failed to make connection to backend: 127.0.0.1, referer: https://aviator.betcheza.co.ke/
+[Sat Jul 25 09:37:58.835381 2026] [proxy:error] [pid 1076337:tid 1076738] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:37:58.835737 2026] [proxy_http:error] [pid 1076337:tid 1076738] [remote 102.203.101.155:54792] AH01114: HTTP: failed to make connection to backend: 127.0.0.1
+[Sat Jul 25 09:37:59.124412 2026] [proxy:error] [pid 1076337:tid 1076748] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:37:59.124593 2026] [proxy_http:error] [pid 1076337:tid 1076748] [remote 102.203.101.155:54792] AH01114: HTTP: failed to make connection to backend: 127.0.0.1, referer: https://aviator.betcheza.co.ke/
+[Sat Jul 25 09:38:55.694764 2026] [proxy:error] [pid 1076311:tid 1076489] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:38:55.694911 2026] [proxy_http:error] [pid 1076311:tid 1076489] [remote 102.203.101.155:54848] AH01114: HTTP: failed to make connection to backend: 127.0.0.1
+[Sat Jul 25 09:38:55.977901 2026] [proxy:error] [pid 1076311:tid 1076393] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:38:55.978026 2026] [proxy_http:error] [pid 1076311:tid 1076393] [remote 102.203.101.155:54848] AH01114: HTTP: failed to make connection to backend: 127.0.0.1, referer: https://aviator.betcheza.co.ke/
+[Sat Jul 25 09:40:29.540502 2026] [proxy:error] [pid 1076311:tid 1076344] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:40:29.540699 2026] [proxy_http:error] [pid 1076311:tid 1076344] [remote 102.203.101.155:48359] AH01114: HTTP: failed to make connection to backend: 127.0.0.1
+[Sat Jul 25 09:40:29.801514 2026] [proxy:error] [pid 1076311:tid 1076348] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:40:29.801739 2026] [proxy_http:error] [pid 1076311:tid 1076348] [remote 102.203.101.155:48359] AH01114: HTTP: failed to make connection to backend: 127.0.0.1, referer: https://aviator.betcheza.co.ke/
+[Sat Jul 25 09:42:49.349858 2026] [proxy:error] [pid 1076311:tid 1076632] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:42:49.350031 2026] [proxy_http:error] [pid 1076311:tid 1076632] [remote 102.203.101.155:55352] AH01114: HTTP: failed to make connection to backend: 127.0.0.1
+[Sat Jul 25 09:42:49.605296 2026] [proxy:error] [pid 1076311:tid 1076517] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:42:49.608616 2026] [proxy_http:error] [pid 1076311:tid 1076517] [remote 102.203.101.155:55352] AH01114: HTTP: failed to make connection to backend: 127.0.0.1, referer: https://aviator.betcheza.co.ke/
+[Sat Jul 25 09:43:50.364518 2026] [proxy:error] [pid 1076311:tid 1076471] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:43:50.364721 2026] [proxy_http:error] [pid 1076311:tid 1076471] [remote 102.203.101.155:48887] AH01114: HTTP: failed to make connection to backend: 127.0.0.1
+[Sat Jul 25 09:43:50.636034 2026] [proxy:error] [pid 1076311:tid 1076500] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:43:50.636160 2026] [proxy_http:error] [pid 1076311:tid 1076500] [remote 102.203.101.155:48887] AH01114: HTTP: failed to make connection to backend: 127.0.0.1, referer: https://aviator.betcheza.co.ke/
+[Sat Jul 25 09:43:56.458372 2026] [proxy:error] [pid 1076311:tid 1076393] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:43:56.458497 2026] [proxy_http:error] [pid 1076311:tid 1076393] [remote 102.203.101.155:55450] AH01114: HTTP: failed to make connection to backend: 127.0.0.1
+[Sat Jul 25 09:43:56.784026 2026] [proxy:error] [pid 1076311:tid 1076567] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:43:56.784162 2026] [proxy_http:error] [pid 1076311:tid 1076567] [remote 102.203.101.155:55450] AH01114: HTTP: failed to make connection to backend: 127.0.0.1, referer: https://aviator.betcheza.co.ke/
+[Sat Jul 25 09:44:32.778101 2026] [proxy:error] [pid 1076311:tid 1076353] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:44:32.778409 2026] [proxy_http:error] [pid 1076311:tid 1076353] [remote 102.203.101.155:49021] AH01114: HTTP: failed to make connection to backend: 127.0.0.1
+[Sat Jul 25 09:44:33.039221 2026] [proxy:error] [pid 1076311:tid 1076617] (111)Connection refused: AH00957: http: attempt to connect to 127.0.0.1:5001 (127.0.0.1:5001) failed
+[Sat Jul 25 09:44:33.039355 2026] [proxy_http:error] [pid 1076311:tid 1076617] [remote 102.203.101.155:49021] AH01114: HTTP: failed to make connection to backend: 127.0.0.1, referer: https://aviator.betcheza.co.ke/
+total 508
+drwx--x--x. 4 diradmin diradmin 12288 Jul 25 10:37 .
+drwx--x--x. 9 diradmin diradmin 20480 Jul 25 10:38 ..
+drwx------  2 diradmin diradmin  4096 Jul 25 07:52 acme_provider_cert_logs
+-rw-r--r--  1 diradmin access    3525 Jul 25 07:52 aviator.betcheza.co.ke.cacert
+-rw-r--r--  1 diradmin access    1387 Jul 25 07:52 aviator.betcheza.co.ke.cert
+-rw-r--r--  1 diradmin access    4913 Jul 25 07:52 aviator.betcheza.co.ke.cert.combined
+-rw-r--r--  1 diradmin diradmin    11 Jul 25 07:52 aviator.betcheza.co.ke.cert.creation_time
+-rw-r-----  1 diradmin access     306 Jul 25 07:52 aviator.betcheza.co.ke.key
+-rw-r--r--  1 diradmin access    3525 Jun  5 06:49 betcheza.co.ke.cacert
+-rw-r--r--  1 diradmin access    1464 Jun  5 06:49 betcheza.co.ke.cert
+-rw-r--r--  1 diradmin access    4990 Jun  5 06:49 betcheza.co.ke.cert.combined
+-rw-r--r--  1 diradmin diradmin    11 Jun  5 06:49 betcheza.co.ke.cert.creation_time
+-rw-------  1 diradmin diradmin   277 Jul 25 07:51 betcheza.co.ke.conf
+-rw-r--r--  1 admin    admin      901 May  4 08:22 betcheza.co.ke.cust_httpd
+-rw-------  1 diradmin diradmin   330 Oct 28  2025 betcheza.co.ke.ftp
+-rw-------  1 diradmin diradmin    16 Jul 25 07:51 betcheza.co.ke.ip_list
+-rw-r-----  1 diradmin access     306 Jun  5 06:49 betcheza.co.ke.key
+-rw-r--r--  1 diradmin diradmin     0 Oct 28  2025 betcheza.co.ke.mime.types
+-rw-------  1 diradmin diradmin    18 Oct 28  2025 betcheza.co.ke.php.ini
+-rw-------  1 diradmin diradmin     8 Jul 25 07:51 betcheza.co.ke.subdomains
+-rw-------  1 diradmin diradmin   173 Jul 25 07:51 betcheza.co.ke.subdomains.docroot.override
+-rw-------  1 diradmin diradmin    54 Jul 25 07:51 betcheza.co.ke.usage
+drwxr-xr-x  2 root     root      4096 Apr 24 04:44 dossy.world
+-rw-r--r--  1 diradmin access    1566 Mar 15 09:31 dossy.world.cacert
+-rw-r--r--  1 diradmin access    1432 Mar 15 09:31 dossy.world.cert
+-rw-r-----  1 diradmin access    2999 Mar 15 09:31 dossy.world.cert.combined
+-rw-------  1 diradmin diradmin   523 Jul 23 11:34 dossy.world.conf
+-rw-r--r--  1 root     root       116 Apr 24 05:13 dossy.world.custom_httpd_include
+-rw-------  1 diradmin diradmin   324 Oct  9  2025 dossy.world.ftp
+-rw-------  1 diradmin diradmin     0 Jan 10  2026 dossy.world.handlers
+-rw-------  1 diradmin diradmin    16 Jul 23 11:34 dossy.world.ip_list
+-rw-r-----  1 diradmin access     306 Mar 15 09:31 dossy.world.key
+-rw-------  1 diradmin diradmin     5 Oct 14  2025 dossy.world.subdomains
+-rw-------  1 diradmin diradmin   154 Oct 14  2025 dossy.world.subdomains.docroot.override
+-rw-------  1 diradmin diradmin    52 Jul 25 00:10 dossy.world.usage
+-rw-r--r--  1 diradmin access    1566 May 19 05:48 lynnietravisadventures.com.cacert
+-rw-r--r--  1 diradmin access    1541 May 19 05:48 lynnietravisadventures.com.cert
+-rw-r--r--  1 diradmin access    3108 May 19 05:48 lynnietravisadventures.com.cert.combined
+-rw-r--r--  1 diradmin diradmin    11 May 19 05:48 lynnietravisadventures.com.cert.creation_time
+-rw-------  1 diradmin diradmin   582 Jul 23 11:34 lynnietravisadventures.com.conf
+-rw-------  1 diradmin diradmin    32 Dec 23  2025 lynnietravisadventures.com.csr_info
+-rw-------  1 diradmin diradmin   354 Dec 23  2025 lynnietravisadventures.com.ftp
+-rw-------  1 diradmin diradmin    16 Jul 23 11:34 lynnietravisadventures.com.ip_list
+-rw-r-----  1 diradmin access     306 May 19 05:48 lynnietravisadventures.com.key
+-rw-------  1 diradmin diradmin     0 Dec 23  2025 lynnietravisadventures.com.subdomains
+-rw-------  1 diradmin diradmin    51 Jul 25 00:10 lynnietravisadventures.com.usage
+-rw-r--r--  1 diradmin access    3525 Jun 18 06:56 naughtyhaughty.com.cacert
+-rw-r--r--  1 diradmin access    1513 Jun 18 06:56 naughtyhaughty.com.cert
+-rw-r--r--  1 diradmin access    5039 Jun 18 06:56 naughtyhaughty.com.cert.combined
+-rw-r--r--  1 diradmin diradmin    11 Jun 18 06:56 naughtyhaughty.com.cert.creation_time
+-rw-------  1 diradmin diradmin   550 Jul 23 11:34 naughtyhaughty.com.conf
+-rw-------  1 diradmin diradmin    24 Nov  9  2025 naughtyhaughty.com.csr_info
+-rw-r--r--  1 root     root       573 Jul 12 02:33 naughtyhaughty.com.cust_httpd
+-rw-------  1 diradmin diradmin   338 Sep 28  2025 naughtyhaughty.com.ftp
+-rw-------  1 diradmin diradmin    16 Jul 23 11:34 naughtyhaughty.com.ip_list
+-rw-r-----  1 diradmin access     306 Jun 18 06:56 naughtyhaughty.com.key
+-rw-------  1 diradmin diradmin     0 Sep 28  2025 naughtyhaughty.com.subdomains
+-rw-------  1 diradmin diradmin    54 Jul 25 00:10 naughtyhaughty.com.usage
+-rw-r--r--  1 diradmin access    1566 May 20 05:49 perigonproperties.co.ke.cacert
+-rw-r--r--  1 diradmin access    1558 May 20 05:49 perigonproperties.co.ke.cert
+-rw-r--r--  1 diradmin access    3125 May 20 05:49 perigonproperties.co.ke.cert.combined
+-rw-r--r--  1 diradmin diradmin    11 May 20 05:49 perigonproperties.co.ke.cert.creation_time
+-rw-------  1 diradmin diradmin   556 Jul 23 11:34 perigonproperties.co.ke.conf
+-rw-------  1 diradmin diradmin    29 Oct 11  2025 perigonproperties.co.ke.csr_info
+-rw-------  1 diradmin diradmin   348 Sep 28  2025 perigonproperties.co.ke.ftp
+-rw-------  1 diradmin diradmin    16 Jul 23 11:34 perigonproperties.co.ke.ip_list
+-rw-r-----  1 diradmin access     306 May 20 05:49 perigonproperties.co.ke.key
+-rw-------  1 diradmin diradmin     0 Sep 28  2025 perigonproperties.co.ke.subdomains
+-rw-------  1 diradmin diradmin    54 Jul 25 00:11 perigonproperties.co.ke.usage
+-rw-r--r--  1 diradmin access    1566 May 26 05:53 richdatingnetwork.com.cacert
+-rw-r--r--  1 diradmin access    1541 May 26 05:53 richdatingnetwork.com.cert
+-rw-r--r--  1 diradmin access    3108 May 26 05:53 richdatingnetwork.com.cert.combined
+-rw-r--r--  1 diradmin diradmin    11 May 26 05:53 richdatingnetwork.com.cert.creation_time
+-rw-------  1 diradmin diradmin   562 Jul 23 11:34 richdatingnetwork.com.conf
+-rw-------  1 diradmin diradmin    27 Oct 17  2025 richdatingnetwork.com.csr_info
+-rw-------  1 diradmin diradmin   344 Sep 28  2025 richdatingnetwork.com.ftp
+-rw-------  1 diradmin diradmin    16 Jul 23 11:34 richdatingnetwork.com.ip_list
+-rw-r-----  1 diradmin access     306 May 26 05:53 richdatingnetwork.com.key
+-rw-r--r--  1 diradmin diradmin    19 Mar 27 08:22 richdatingnetwork.com.modsecurity_rules
+-rw-------  1 diradmin diradmin     0 Sep 28  2025 richdatingnetwork.com.subdomains
+-rw-------  1 diradmin diradmin    54 Jul 25 00:11 richdatingnetwork.com.usage
+-rw-r--r--  1 diradmin access    3525 Jul  4 00:08 sample.betcheza.co.ke.cacert
+-rw-r--r--  1 diradmin access    1383 Jul  4 00:08 sample.betcheza.co.ke.cert
+-rw-r--r--  1 diradmin access    4909 Jul  4 00:08 sample.betcheza.co.ke.cert.combined
+-rw-r--r--  1 diradmin diradmin    11 Jul  4 00:08 sample.betcheza.co.ke.cert.creation_time
+-rw-------  1 diradmin diradmin   581 Jul 23 11:34 sample.betcheza.co.ke.conf
+-rw-------  1 diradmin diradmin    27 Nov 22  2025 sample.betcheza.co.ke.csr_info
+-rw-------  1 diradmin diradmin   344 Oct 29  2025 sample.betcheza.co.ke.ftp
+-rw-------  1 diradmin diradmin    16 Jul 23 11:34 sample.betcheza.co.ke.ip_list
+-rw-r-----  1 diradmin access     306 Jul  4 00:08 sample.betcheza.co.ke.key
+-rw-------  1 diradmin diradmin     0 Oct 29  2025 sample.betcheza.co.ke.subdomains
+-rw-------  1 diradmin diradmin   179 Oct 28  2025 sample.betcheza.co.ke.subdomains.docroot.override
+-rw-------  1 diradmin diradmin    51 Jul 25 00:11 sample.betcheza.co.ke.usage
+-rw-r--r--  1 diradmin access    3525 Jul 20 10:51 test.richdatingnetwork.com.cacert
+-rw-r--r--  1 diradmin access    1590 Jul 20 10:51 test.richdatingnetwork.com.cert
+-rw-r--r--  1 diradmin access    5116 Jul 20 10:51 test.richdatingnetwork.com.cert.combined
+-rw-r--r--  1 diradmin diradmin    11 Jul 20 10:51 test.richdatingnetwork.com.cert.creation_time
+-rw-------  1 diradmin diradmin   242 Jul 23 11:34 test.richdatingnetwork.com.conf
+-rw-------  1 diradmin diradmin   354 May  8 01:18 test.richdatingnetwork.com.ftp
+-rw-------  1 diradmin diradmin    16 Jul 23 11:34 test.richdatingnetwork.com.ip_list
+-rw-r-----  1 diradmin access     306 Jul 20 10:51 test.richdatingnetwork.com.key
+-rw-------  1 diradmin diradmin     0 May  8 01:18 test.richdatingnetwork.com.subdomains
+-rw-------  1 diradmin diradmin    52 Jul 25 00:11 test.richdatingnetwork.com.usage
+-rw-------  1 diradmin diradmin    18 Oct  1  2025 topazdigital.co.ke.php.ini
+-rw-r-----  1 diradmin access    1566 May 25 11:51 wet3.camp.cacert
+-rw-r--r--  1 diradmin access    1330 May 25 11:51 wet3.camp.cert
+-rw-r-----  1 diradmin access    2897 May 25 11:51 wet3.camp.cert.combined
+-rw-r--r--  1 diradmin diradmin    11 May 25 11:51 wet3.camp.cert.creation_time
+-rw-------  1 diradmin diradmin   486 Jul 23 11:34 wet3.camp.conf
+-rw-------  1 diradmin diradmin    15 May 25 11:51 wet3.camp.csr_info
+-rw-------  1 diradmin diradmin   320 May 25 04:29 wet3.camp.ftp
+-rw-------  1 diradmin diradmin    16 Jul 23 11:34 wet3.camp.ip_list
+-rw-r-----  1 diradmin access     306 May 25 11:51 wet3.camp.key
+-rw-------  1 diradmin diradmin     0 May 25 04:29 wet3.camp.subdomains
+-rw-------  1 diradmin diradmin    51 Jul 25 00:11 wet3.camp.usage
+-rw-r--r--  1 diradmin access    1566 May 20 05:49 wingscontractors.com.cacert
+-rw-r--r--  1 diradmin access    1529 May 20 05:49 wingscontractors.com.cert
+-rw-r--r--  1 diradmin access    3096 May 20 05:49 wingscontractors.com.cert.combined
+-rw-r--r--  1 diradmin diradmin    11 May 20 05:49 wingscontractors.com.cert.creation_time
+-rw-------  1 diradmin diradmin   558 Jul 23 11:34 wingscontractors.com.conf
+-rw-------  1 diradmin diradmin    26 Oct 11  2025 wingscontractors.com.csr_info
+-rw-------  1 diradmin diradmin   342 Sep 28  2025 wingscontractors.com.ftp
+-rw-------  1 diradmin diradmin    16 Jul 23 11:34 wingscontractors.com.ip_list
+-rw-r-----  1 diradmin access     306 May 20 05:49 wingscontractors.com.key
+-rw-------  1 diradmin diradmin     0 Sep 28  2025 wingscontractors.com.subdomains
+-rw-------  1 diradmin diradmin    52 Jul 25 00:11 wingscontractors.com.usage
+No custom domain conf file
+[root@mail crashbet]#

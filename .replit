@@ -21,3 +21,9 @@ timeoutMs = 20000
 
 [nix]
 channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+BASE_PATH = "/"
+VITE_CLERK_PUBLISHABLE_KEY = "pk_test_c2hhcmluZy1zdW5iZWFtLTE1LmNsZXJrLmFjY291bnRzLmRldiQ"
