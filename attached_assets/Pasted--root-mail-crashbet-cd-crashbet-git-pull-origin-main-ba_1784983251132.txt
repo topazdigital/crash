@@ -1,0 +1,116 @@
+[root@mail crashbet]# cd ~/crashbet && git pull origin main && bash scripts/server-deploy.sh
+remote: Enumerating objects: 23, done.
+remote: Counting objects: 100% (23/23), done.
+remote: Compressing objects: 100% (10/10), done.
+remote: Total 18 (delta 8), reused 18 (delta 8), pack-reused 0 (from 0)
+Unpacking objects: 100% (18/18), 1.05 MiB | 9.45 MiB/s, done.
+From https://github.com/topazdigital/crash
+ * branch            main       -> FETCH_HEAD
+   8f54628..f3ff8a9  main       -> origin/main
+Updating 8f54628..f3ff8a9
+Fast-forward
+ artifacts/api-server/build.mjs                                              |   3 +-
+ ...root-mail-crashbet-cd-crashbet-git-pull-origin-main-ba_1784982629866.txt | 135 ++++++++++++++++++++++++++++++++++++
+ ...root-mail-crashbet-sed-i-LoadModule-proxy-module-modul_1784982928248.txt | 111 +++++++++++++++++++++++++++++
+ attached_assets/image_1784982643680.png                                     | Bin 0 -> 149904 bytes
+ attached_assets/image_1784982664131.png                                     | Bin 0 -> 282637 bytes
+ attached_assets/image_1784982837292.png                                     | Bin 0 -> 338946 bytes
+ attached_assets/image_1784982862140.png                                     | Bin 0 -> 281666 bytes
+ attached_assets/image_1784982884239.png                                     | Bin 0 -> 144190 bytes
+ 8 files changed, 248 insertions(+), 1 deletion(-)
+ create mode 100644 attached_assets/Pasted--root-mail-crashbet-cd-crashbet-git-pull-origin-main-ba_1784982629866.txt
+ create mode 100644 attached_assets/Pasted--root-mail-crashbet-sed-i-LoadModule-proxy-module-modul_1784982928248.txt
+ create mode 100644 attached_assets/image_1784982643680.png
+ create mode 100644 attached_assets/image_1784982664131.png
+ create mode 100644 attached_assets/image_1784982837292.png
+ create mode 100644 attached_assets/image_1784982862140.png
+ create mode 100644 attached_assets/image_1784982884239.png
+  Using public_html: /home/admin/domains/aviator.betcheza.co.ke/public_html
+==> [1/6] Pulling latest code from GitHub...
+From https://github.com/topazdigital/crash
+ * branch            main       -> FETCH_HEAD
+Already up to date.
+==> [2/6] Installing / updating dependencies...
+Scope: all 9 workspace projects
+Lockfile is up to date, resolution step is skipped
+Already up to date
+. preinstall$ sh -c 'rm -f package-lock.json yarn.lock; case "$npm_config_user_agent" in pnpm/*) ;; *) echo "Use pnpm…
+└─ Done in 60ms
+╭ Warning ───────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                            │
+│   Ignored build scripts: @clerk/shared@3.47.8.                                             │
+│   Run "pnpm approve-builds" to pick which dependencies should be allowed to run scripts.   │
+│                                                                                            │
+╰────────────────────────────────────────────────────────────────────────────────────────────╯
+Done in 4.5s using pnpm v10.34.5
+==> [3/6] Loading production environment variables...
+==> [4/6] Building React frontend...
+
+> @workspace/pantaneax@0.0.0 build /root/crashbet/artifacts/pantaneax
+> vite build --config vite.config.ts
+
+vite v7.3.6 building client environment for production...
+✓ 1837 modules transformed.
+dist/public/index.html                   0.70 kB │ gzip:   0.33 kB
+dist/public/assets/index-Bc5zwyaq.css   70.78 kB │ gzip:  12.50 kB
+dist/public/assets/index-DAcAGl-f.js   501.00 kB │ gzip: 153.18 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 16.24s
+==> [5/6] Deploying frontend to public_html...
+  Frontend deployed to /home/admin/domains/aviator.betcheza.co.ke/public_html
+==> [6/6] Building & restarting API server...
+
+> @workspace/api-server@0.0.0 build /root/crashbet/artifacts/api-server
+> node ./build.mjs
+
+
+  dist/index.mjs                       2.8mb ⚠️
+  dist/pino-worker.mjs               153.4kb
+  dist/pino-file.mjs                 142.0kb
+  dist/pino-pretty.mjs               114.4kb
+  dist/thread-stream-worker.mjs        7.3kb
+  dist/index.mjs.map                   5.0mb
+  dist/pino-worker.mjs.map           256.9kb
+  dist/pino-file.mjs.map             229.0kb
+  dist/pino-pretty.mjs.map           203.6kb
+  dist/thread-stream-worker.mjs.map   12.0kb
+
+⚡ Done in 1687ms
+
+>>>> In-memory PM2 is out-of-date, do:
+>>>> $ pm2 update
+In memory PM2 version: 7.0.1
+Local PM2 version: 7.0.3
+
+[PM2] Applying action restartProcessId on app [crashbet-api](ids: [ 5 ])
+[PM2] [crashbet-api](5) ✓
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 3  │ betcheza           │ fork     │ 67   │ online    │ 0%       │ 1.7gb    │
+│ 5  │ crashbet-api       │ fork     │ 45   │ online    │ 0%       │ 23.6mb   │
+│ 0  │ dossy              │ fork     │ 0    │ online    │ 0%       │ 20.7mb   │
+│ 2  │ naughtyhaughty-api │ fork     │ 0    │ online    │ 0%       │ 81.9mb   │
+│ 4  │ rdn-api            │ fork     │ 0    │ online    │ 0%       │ 155.8mb  │
+│ 1  │ wet3camp-api       │ fork     │ 0    │ online    │ 0%       │ 51.3mb   │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+[PM2] Saving current process list...
+
+>>>> In-memory PM2 is out-of-date, do:
+>>>> $ pm2 update
+In memory PM2 version: 7.0.1
+Local PM2 version: 7.0.3
+
+[PM2] Successfully saved in /root/.pm2/dump.pm2
+
+================================================================
+ Deploy complete!
+  Frontend: https://aviator.betcheza.co.ke
+  API:      http://localhost:3001/api
+  PM2 logs: pm2 logs crashbet-api
+================================================================
+[root@mail crashbet]#
