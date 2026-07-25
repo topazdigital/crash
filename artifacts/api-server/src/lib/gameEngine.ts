@@ -138,7 +138,8 @@ class ServerGameEngine {
     const tick = () => {
       this.broadcast(this.snapshot());
       if (this.countdown <= 1) {
-        this.beginRunning();
+        // Let "1s" display for a full second before launching
+        this.timer = setTimeout(() => this.beginRunning(), 1_000);
         return;
       }
       this.countdown--;
