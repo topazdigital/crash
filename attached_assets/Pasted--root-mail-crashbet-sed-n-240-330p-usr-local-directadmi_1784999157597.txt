@@ -1,0 +1,93 @@
+[root@mail crashbet]# sed -n '240,330p' /usr/local/directadmin/data/users/admin/httpd.conf
+RequestHeader set X-Forwarded-Port "443"
+# ModSecurity exemptions for betcheza API (SecRule ctl works in phase:1 unlike LocationMatch)
+# Allow PUT/PATCH/DELETE for the admin API (rule 911100 = Method not allowed)
+SecRule REQUEST_URI "@beginsWith /api/admin/" "id:9001001,phase:1,pass,nolog,ctl:ruleRemoveById=911100"
+# Disable all ModSecurity rules for OAuth callbacks (URL-encoded params trigger false positives)
+SecRule REQUEST_URI "@beginsWith /api/auth/oauth/" "id:9001002,phase:1,pass,nolog,ctl:ruleEngine=Off"
+# Disable all ModSecurity rules for admin API (JSON bodies with credentials trigger false positives)
+SecRule REQUEST_URI "@beginsWith /api/admin/" "id:9001003,phase:2,pass,nolog,ctl:ruleEngine=Off"
+        ServerName www.aviator.betcheza.co.ke
+        ServerAlias www.aviator.betcheza.co.ke aviator.betcheza.co.ke
+        ServerAdmin webmaster@betcheza.co.ke
+        DocumentRoot "/home/admin/domains/aviator.betcheza.co.ke/public_html"
+        ScriptAlias /cgi-bin/ "/home/admin/domains/aviator.betcheza.co.ke/public_html/cgi-bin/"
+        UseCanonicalName OFF
+        SetEnvIf X-Forwarded-Proto "https" HTTPS=on
+        RewriteEngine On
+        RewriteCond %{HTTPS} !=on
+        RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
+        RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+        SuexecUserGroup admin admin
+        CustomLog /var/log/httpd/domains/betcheza.co.ke.aviator.bytes bytes
+        CustomLog /var/log/httpd/domains/betcheza.co.ke.aviator.log combined
+        ErrorLog /var/log/httpd/domains/betcheza.co.ke.aviator.error.log
+        <Directory "/home/admin/domains/aviator.betcheza.co.ke/public_html">
+                <FilesMatch "\.(php|inc|phtml)$">
+                        <If "-f %{REQUEST_FILENAME}">
+                                AddHandler "proxy:unix:/usr/local/php72/sockets/admin.sock|fcgi://localhost" .inc .php .phtml
+                        </If>
+                </FilesMatch>
+                <FilesMatch "\.(php53|php54|php55|php56|php70|php71|php72|php73|php74|php80|php81|php82)$">
+                        Order Allow,Deny
+                        Deny from all
+                </FilesMatch>
+        </Directory>
+</VirtualHost>
+
+<VirtualHost 157.250.205.180:443 >
+ProxyPreserveHost On
+ProxyRequests Off
+ProxyPass /.well-known !
+ProxyPass /api http://127.0.0.1:3001/api
+ProxyPassReverse /api http://127.0.0.1:3001/api
+RequestHeader set X-Forwarded-Proto "https"
+RequestHeader set X-Forwarded-Port "443"
+# ModSecurity exemptions for betcheza API (SecRule ctl works in phase:1 unlike LocationMatch)
+# Allow PUT/PATCH/DELETE for the admin API (rule 911100 = Method not allowed)
+SecRule REQUEST_URI "@beginsWith /api/admin/" "id:9001001,phase:1,pass,nolog,ctl:ruleRemoveById=911100"
+# Disable all ModSecurity rules for OAuth callbacks (URL-encoded params trigger false positives)
+SecRule REQUEST_URI "@beginsWith /api/auth/oauth/" "id:9001002,phase:1,pass,nolog,ctl:ruleEngine=Off"
+# Disable all ModSecurity rules for admin API (JSON bodies with credentials trigger false positives)
+SecRule REQUEST_URI "@beginsWith /api/admin/" "id:9001003,phase:2,pass,nolog,ctl:ruleEngine=Off"
+        SSLEngine on
+        SSLCertificateFile /usr/local/directadmin/data/users/admin/domains/aviator.betcheza.co.ke.cert.combined
+        SSLCertificateKeyFile /usr/local/directadmin/data/users/admin/domains/aviator.betcheza.co.ke.key
+        ServerName www.aviator.betcheza.co.ke
+        ServerAlias www.aviator.betcheza.co.ke aviator.betcheza.co.ke
+        ServerAdmin webmaster@betcheza.co.ke
+        DocumentRoot "/home/admin/domains/aviator.betcheza.co.ke/public_html"
+        ScriptAlias /cgi-bin/ "/home/admin/domains/aviator.betcheza.co.ke/public_html/cgi-bin/"
+        UseCanonicalName OFF
+        SuexecUserGroup admin admin
+        CustomLog /var/log/httpd/domains/betcheza.co.ke.aviator.bytes bytes
+        CustomLog /var/log/httpd/domains/betcheza.co.ke.aviator.log combined
+        ErrorLog /var/log/httpd/domains/betcheza.co.ke.aviator.error.log
+        <Directory "/home/admin/domains/aviator.betcheza.co.ke/public_html">
+                <FilesMatch "\.(php|inc|phtml)$">
+                        <If "-f %{REQUEST_FILENAME}">
+                                AddHandler "proxy:unix:/usr/local/php72/sockets/admin.sock|fcgi://localhost" .inc .php .phtml
+                        </If>
+                </FilesMatch>
+                <FilesMatch "\.(php53|php54|php55|php56|php70|php71|php72|php73|php74|php80|php81|php82)$">
+                        Order Allow,Deny
+                        Deny from all
+                </FilesMatch>
+        </Directory>
+</VirtualHost>
+
+<VirtualHost 157.250.205.180:80 >
+        ServerName www.lynnietravisadventures.com
+        ServerAlias www.lynnietravisadventures.com lynnietravisadventures.com
+        ServerAdmin webmaster@lynnietravisadventures.com
+        DocumentRoot "/home/admin/domains/lynnietravisadventures.com/public_html"
+        ScriptAlias /cgi-bin/ "/home/admin/domains/lynnietravisadventures.com/public_html/cgi-bin/"
+        UseCanonicalName OFF
+        SetEnvIf X-Forwarded-Proto "https" HTTPS=on
+        RewriteEngine On
+        RewriteCond %{HTTPS} !=on
+        RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
+        RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+        SuexecUserGroup admin admin
+        CustomLog /var/log/httpd/domains/lynnietravisadventures.com.bytes bytes
+[root@mail crashbet]#
