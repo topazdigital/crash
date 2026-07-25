@@ -58,14 +58,16 @@ echo "  Frontend deployed to $PUBLIC_HTML"
 echo "==> [6/6] Building & restarting API server..."
 pnpm --filter @workspace/api-server run build
 
-# Start or restart with PM2 — always set PORT explicitly so it never inherits
-# the PORT=3000 that was used for the Vite build above
+# Start or restart with PM2.
+# Pass the script path as the positional argument AFTER `--` so PM2 uses
+# the node interpreter directly (not bash). PORT must be set explicitly here
+# so the Vite build PORT=3000 subshell never bleeds through.
 if pm2 describe "$APP_NAME" &>/dev/null; then
   pm2 delete "$APP_NAME"
 fi
-PORT=$API_PORT NODE_ENV=production pm2 start \
-  "node --enable-source-maps $REPO_DIR/artifacts/api-server/dist/index.mjs" \
-  --name "$APP_NAME"
+PORT=$API_PORT NODE_ENV=production pm2 start node \
+  --name "$APP_NAME" \
+  -- --enable-source-maps "$REPO_DIR/artifacts/api-server/dist/index.mjs"
 pm2 save
 
 echo ""
