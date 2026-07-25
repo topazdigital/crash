@@ -1,0 +1,133 @@
+[root@mail crashbet]# # 1. Check if HTTPS is also returning 200
+curl -sk -o /dev/null -w "%{http_code}\n" \
+  -H "Host: aviator.betcheza.co.ke" https://127.0.0.1/
+
+# 2. See why crashbet-api is crash-looping (2399 restarts is bad)
+pm2 logs crashbet-api --lines 30 --nostream
+
+# 3. Remove the leftover /api proxy to port 4000 (duplicate from a previous attempt)
+#    and fix both HTTP + HTTPS vhosts cleanly
+python3 << 'EOF'
+import re
+
+conf = "/usr/local/directadmin/data/users/admin/httpd.conf"
+with open(conf) as f:
+    content = f.read()
+
+def clean_vhost(block):
+    lines = []
+    for line in block.split("\n"):
+        s = line.strip()
+        # Remove any /api proxy to wrong ports (4000, or duplicates)
+        if re.match(r'ProxyPass\s+/api\s+http://127\.0\.0\.1:(4000|3001)/api', s):
+            print(f"  Removing old: {s}")
+            continue
+        if re.match(r'ProxyPassReverse\s+/api\s+http://127\.0\.0\.1:(4000|3001)/api', s):
+            print(f"  Removing old: {s}")
+            continue
+        lines.append(line)
+    result = "\n".join(lines)
+    # Re-add the correct /api proxy to 3001 (once, after /.well-known)
+curl -sk -o /dev/null -w "HTTPS: %{http_code}\n" -H "Host: aviator.betcheza.co.ke" https://127.0.0.1/E)',
+200
+
+>>>> In-memory PM2 is out-of-date, do:
+>>>> $ pm2 update
+In memory PM2 version: 7.0.1
+Local PM2 version: 7.0.3
+
+[TAILING] Tailing last 30 lines for [crashbet-api] process (change the value with --lines option)
+/root/.pm2/logs/crashbet-api-error.log last 30 lines:
+7|crashbet |
+7|crashbet | Node.js v20.20.2
+7|crashbet | node:internal/modules/cjs/loader:1210
+7|crashbet |   throw err;
+7|crashbet |   ^
+7|crashbet |
+7|crashbet | Error: Cannot find module '/root/crashbet/artifacts/api-server/dist/index.mjs'
+7|crashbet |     at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+7|crashbet |     at Module._load (node:internal/modules/cjs/loader:1038:27)
+7|crashbet |     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
+7|crashbet |     at node:internal/main/run_main_module:28:49 {
+7|crashbet |   code: 'MODULE_NOT_FOUND',
+7|crashbet |   requireStack: []
+7|crashbet | }
+7|crashbet |
+7|crashbet | Node.js v20.20.2
+7|crashbet | node:internal/modules/cjs/loader:1210
+7|crashbet |   throw err;
+7|crashbet |   ^
+7|crashbet |
+7|crashbet | Error: Cannot find module '/root/crashbet/artifacts/api-server/dist/index.mjs'
+7|crashbet |     at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+7|crashbet |     at Module._load (node:internal/modules/cjs/loader:1038:27)
+7|crashbet |     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
+7|crashbet |     at node:internal/main/run_main_module:28:49 {
+7|crashbet |   code: 'MODULE_NOT_FOUND',
+7|crashbet |   requireStack: []
+7|crashbet | }
+7|crashbet |
+7|crashbet | Node.js v20.20.2
+
+/root/.pm2/logs/crashbet-api-out.log last 30 lines:
+7|crashbet | dules/.pnpm/express@5.2.1/node_modules/express/lib/application.js:605:24)\n    at <anonymous> (/root/crashbet/artifacts/api-server/src/index.ts:18:5)\n    at ModuleJob.run (node:internal/modules/esm/module_job:325:25)\n    at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)","code":"EADDRINUSE","errno":-98,"syscall":"listen","address":"::","port":3001},"msg":"Error listening on port"}
+7|crashbet | {"level":50,"time":1784986940727,"pid":1320958,"hostname":"mail.betcheza.co.ke","err":{"type":"Error","message":"listen EADDRINUSE: address already in use :::3001","stack":"Error: listen EADDRINUSE: address already in use :::3001\n    at Server.setupListenHandle [as _listen2] (node:net:1908:16)\n    at listenInCluster (node:net:1965:12)\n    at Server.listen (node:net:2067:7)\n    at Function.listen (/root/crashbet/node_modules/.pnpm/express@5.2.1/node_modules/express/lib/application.js:605:24)\n    at <anonymous> (/root/crashbet/artifacts/api-server/src/index.ts:18:5)\n    at ModuleJob.run (node:internal/modules/esm/module_job:325:25)\n    at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)","code":"EADDRINUSE","errno":-98,"syscall":"listen","address":"::","port":3001},"msg":"Error listening on port"}
+7|crashbet | {"level":50,"time":1784986941885,"pid":1321003,"hostname":"mail.betcheza.co.ke","err":{"type":"Error","message":"listen EADDRINUSE: address already in use :::3001","stack":"Error: listen EADDRINUSE: address already in use :::3001\n    at Server.setupListenHandle [as _listen2] (node:net:1908:16)\n    at listenInCluster (node:net:1965:12)\n    at Server.listen (node:net:2067:7)\n    at Function.listen (/root/crashbet/node_modules/.pnpm/express@5.2.1/node_modules/express/lib/application.js:605:24)\n    at <anonymous> (/root/crashbet/artifacts/api-server/src/index.ts:18:5)\n    at ModuleJob.run (node:internal/modules/esm/module_job:325:25)\n    at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)","code":"EADDRINUSE","errno":-98,"syscall":"listen","address":"::","port":3001},"msg":"Error listening on port"}
+7|crashbet | {"level":50,"time":1784986943356,"pid":1321058,"hostname":"mail.betcheza.co.ke","err":{"type":"Error","message":"listen EADDRINUSE: address already in use :::3001","stack":"Error: listen EADDRINUSE: address already in use :::3001\n    at Server.setupListenHandle [as _listen2] (node:net:1908:16)\n    at listenInCluster (node:net:1965:12)\n    at Server.listen (node:net:2067:7)\n    at Function.listen (/root/crashbet/node_modules/.pnpm/express@5.2.1/node_modules/express/lib/application.js:605:24)\n    at <anonymous> (/root/crashbet/artifacts/api-server/src/index.ts:18:5)\n    at ModuleJob.run (node:internal/modules/esm/module_job:325:25)\n    at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)","code":"EADDRINUSE","errno":-98,"syscall":"listen","address":"::","port":3001},"msg":"Error listening on port"}
+7|crashbet | {"level":50,"time":1784986944544,"pid":1321118,"hostname":"mail.betcheza.co.ke","err":{"type":"Error","message":"listen EADDRINUSE: address already in use :::3001","stack":"Error: listen EADDRINUSE: address already in use :::3001\n    at Server.setupListenHandle [as _listen2] (node:net:1908:16)\n    at listenInCluster (node:net:1965:12)\n    at Server.listen (node:net:2067:7)\n    at Function.listen (/root/crashbet/node_modules/.pnpm/express@5.2.1/node_modules/express/lib/application.js:605:24)\n    at <anonymous> (/root/crashbet/artifacts/api-server/src/index.ts:18:5)\n    at ModuleJob.run (node:internal/modules/esm/module_job:325:25)\n    at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)","code":"EADDRINUSE","errno":-98,"syscall":"listen","address":"::","port":3001},"msg":"Error listening on port"}
+7|crashbet | {"level":50,"time":1784986945970,"pid":1321183,"hostname":"mail.betcheza.co.ke","err":{"type":"Error","message":"listen EADDRINUSE: address already in use :::3001","stack":"Error: listen EADDRINUSE: address already in use :::3001\n    at Server.setupListenHandle [as _listen2] (node:net:1908:16)\n    at listenInCluster (node:net:1965:12)\n    at Server.listen (node:net:2067:7)\n    at Function.listen (/root/crashbet/node_modules/.pnpm/express@5.2.1/node_modules/express/lib/application.js:605:24)\n    at <anonymous> (/root/crashbet/artifacts/api-server/src/index.ts:18:5)\n    at ModuleJob.run (node:internal/modules/esm/module_job:325:25)\n    at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)","code":"EADDRINUSE","errno":-98,"syscall":"listen","address":"::","port":3001},"msg":"Error listening on port"}
+7|crashbet | {"level":50,"time":1784986947361,"pid":1321250,"hostname":"mail.betcheza.co.ke","err":{"type":"Error","message":"listen EADDRINUSE: address already in use :::3001","stack":"Error: listen EADDRINUSE: address already in use :::3001\n    at Server.setupListenHandle [as _listen2] (node:net:1908:16)\n    at listenInCluster (node:net:1965:12)\n    at Server.listen (node:net:2067:7)\n    at Function.listen (/root/crashbet/node_modules/.pnpm/express@5.2.1/node_modules/express/lib/application.js:605:24)\n    at <anonymous> (/root/crashbet/artifacts/api-server/src/index.ts:18:5)\n    at ModuleJob.run (node:internal/modules/esm/module_job:325:25)\n    at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)","code":"EADDRINUSE","errno":-98,"syscall":"listen","address":"::","port":3001},"msg":"Error listening on port"}
+
+
+[Cleaning vhost: <VirtualHost 157.250.205.180:80 >
+ProxyPreserveHos...]
+  Removing old: ProxyPass /api http://127.0.0.1:3001/api
+  Removing old: ProxyPassReverse /api http://127.0.0.1:3001/api
+  Added clean: ProxyPass /api -> 3001
+
+[Cleaning vhost: <VirtualHost 157.250.205.180:443 >
+ProxyPreserveHo...]
+  Removing old: ProxyPass /api http://127.0.0.1:3001/api
+  Removing old: ProxyPassReverse /api http://127.0.0.1:3001/api
+  Added clean: ProxyPass /api -> 3001
+
+Done. Verify:
+  248:  ServerName www.aviator.betcheza.co.ke
+  249:  ServerAlias www.aviator.betcheza.co.ke aviator.betcheza.co.ke
+  251:  DocumentRoot "/home/admin/domains/aviator.betcheza.co.ke/public_html"
+  252:  ScriptAlias /cgi-bin/ "/home/admin/domains/aviator.betcheza.co.ke/public_html/cgi-bin/"
+  260:  CustomLog /var/log/httpd/domains/betcheza.co.ke.aviator.bytes bytes
+  261:  CustomLog /var/log/httpd/domains/betcheza.co.ke.aviator.log combined
+  262:  ErrorLog /var/log/httpd/domains/betcheza.co.ke.aviator.error.log
+  263:  <Directory "/home/admin/domains/aviator.betcheza.co.ke/public_html">
+  292:  SSLCertificateFile /usr/local/directadmin/data/users/admin/domains/aviator.betcheza.co.ke.cert.combined
+  293:  SSLCertificateKeyFile /usr/local/directadmin/data/users/admin/domains/aviator.betcheza.co.ke.key
+  294:  ServerName www.aviator.betcheza.co.ke
+  295:  ServerAlias www.aviator.betcheza.co.ke aviator.betcheza.co.ke
+  297:  DocumentRoot "/home/admin/domains/aviator.betcheza.co.ke/public_html"
+  298:  ScriptAlias /cgi-bin/ "/home/admin/domains/aviator.betcheza.co.ke/public_html/cgi-bin/"
+  301:  CustomLog /var/log/httpd/domains/betcheza.co.ke.aviator.bytes bytes
+  302:  CustomLog /var/log/httpd/domains/betcheza.co.ke.aviator.log combined
+  303:  ErrorLog /var/log/httpd/domains/betcheza.co.ke.aviator.error.log
+  304:  <Directory "/home/admin/domains/aviator.betcheza.co.ke/public_html">
+  384: ProxyPass /.well-known !
+  390: # Proxy all /api requests to Node
+  391: ProxyPass /api http://127.0.0.1:4000/api
+  392: ProxyPassReverse /api http://127.0.0.1:4000/api
+  420:     ProxyPassMatch "^/\.well-known/autoconfig/mail/config-v1\.1\.xml$" "unix:/usr/local/directadmin/shared/internal.sock|http://localhost"
+  424: # Proxy /api/* to Node.js API on port 4000
+  425: ProxyPreserveHost On
+  426: ProxyRequests Off
+  430: ProxyPass /.well-known !
+  436: # Proxy all /api requests to Node
+  437: ProxyPass /api http://127.0.0.1:4000/api
+  438: ProxyPassReverse /api http://127.0.0.1:4000/api
+  464:     ProxyPassMatch "^/\.well-known/autoconfig/mail/config-v1\.1\.xml$" "unix:/usr/local/directadmin/shared/internal.sock|http://localhost"
+  495:     ProxyPassMatch "^/\.well-known/autoconfig/mail/config-v1\.1\.xml$" "unix:/usr/local/directadmin/shared/internal.sock|http://localhost"
+AH00112: Warning: DocumentRoot [/home/admin/domains/dossy.world/public_html/test] does not exist
+AH00112: Warning: DocumentRoot [/home/admin/domains/dossy.world/public_html/test] does not exist
+Syntax OK
+The service command supports only basic LSB actions (start, stop, restart, try-restart, reload, reload-or-restart, try-reload-or-restart, force-reload, status, condrestart). For other actions, please try to use systemctl.
+HTTP:  200
+HTTPS: 200
+[root@mail crashbet]#
