@@ -1,0 +1,39 @@
+[root@mail crashbet]# ss -tlnp | grep -E ':80|:443|:3001'; ls /usr/local/directadmin/data/users/admin/domains/ 2>/dev/null | grep -i "betcheza\|aviator"
+LISTEN 0      511                                 0.0.0.0:3001      0.0.0.0:*    users:(("next-server (v1",pid=1553762,fd=19))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+LISTEN 0      511                                       *:443             *:*    users:(("httpd",pid=1884802,fd=8),("httpd",pid=1884797,fd=8),("httpd",pid=1580923,fd=8))                                                                                                                                                                                                                                                                                                                                                                                                                                               
+LISTEN 0      511                                       *:80              *:*    users:(("httpd",pid=1884802,fd=4),("httpd",pid=1884797,fd=4),("httpd",pid=1580923,fd=4))                                                                                                                                                                                                                                                                                                                                                                                                                                               
+LISTEN 0      511                                       *:8080            *:*    users:(("node /home/admi",pid=3924035,fd=19))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+aviator.betcheza.co.ke
+aviator.betcheza.co.ke.cacert
+aviator.betcheza.co.ke.cert
+aviator.betcheza.co.ke.cert.combined
+aviator.betcheza.co.ke.cert.creation_time
+aviator.betcheza.co.ke.conf
+aviator.betcheza.co.ke.key
+betcheza.co.ke.cacert
+betcheza.co.ke.cert
+betcheza.co.ke.cert.combined
+betcheza.co.ke.cert.creation_time
+betcheza.co.ke.conf
+betcheza.co.ke.cust_httpd
+betcheza.co.ke.ftp
+betcheza.co.ke.ip_list
+betcheza.co.ke.key
+betcheza.co.ke.mime.types
+betcheza.co.ke.php.ini
+betcheza.co.ke.subdomains
+betcheza.co.ke.subdomains.docroot.override
+betcheza.co.ke.usage
+sample.betcheza.co.ke.cacert
+sample.betcheza.co.ke.cert
+sample.betcheza.co.ke.cert.combined
+sample.betcheza.co.ke.cert.creation_time
+sample.betcheza.co.ke.conf
+sample.betcheza.co.ke.csr_info
+sample.betcheza.co.ke.ftp
+sample.betcheza.co.ke.ip_list
+sample.betcheza.co.ke.key
+sample.betcheza.co.ke.subdomains
+sample.betcheza.co.ke.subdomains.docroot.override
+sample.betcheza.co.ke.usage
+[root@mail crashbet]#
