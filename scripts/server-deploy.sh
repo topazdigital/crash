@@ -7,9 +7,26 @@
 set -e
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PUBLIC_HTML="/domains/aviator.betcheza.co.ke/public_html"
 API_PORT=3001
 APP_NAME="crashbet-api"
+
+# Auto-detect public_html path (DirectAdmin stores domains under /home/<user>/domains/)
+DOMAIN="aviator.betcheza.co.ke"
+if [ -d "/home/admin/domains/$DOMAIN/public_html" ]; then
+  PUBLIC_HTML="/home/admin/domains/$DOMAIN/public_html"
+elif [ -d "/home/betcheza/domains/$DOMAIN/public_html" ]; then
+  PUBLIC_HTML="/home/betcheza/domains/$DOMAIN/public_html"
+elif [ -d "/var/www/$DOMAIN/public_html" ]; then
+  PUBLIC_HTML="/var/www/$DOMAIN/public_html"
+else
+  # Fallback: find it
+  PUBLIC_HTML="$(find /home -type d -path "*/$DOMAIN/public_html" 2>/dev/null | head -1)"
+  if [ -z "$PUBLIC_HTML" ]; then
+    echo "ERROR: Cannot find public_html for $DOMAIN. Set PUBLIC_HTML manually in this script."
+    exit 1
+  fi
+fi
+echo "  Using public_html: $PUBLIC_HTML"
 
 echo "==> [1/6] Pulling latest code from GitHub..."
 cd "$REPO_DIR"
