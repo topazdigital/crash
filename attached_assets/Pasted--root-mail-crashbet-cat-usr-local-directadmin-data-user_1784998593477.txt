@@ -1,0 +1,15 @@
+[root@mail crashbet]# cat /usr/local/directadmin/data/users/admin/domains/aviator.betcheza.co.ke.conf
+echo "---"
+pm2 describe crashbet-api | grep -E "port|PORT|exec path|pid"
+ss -tlnp | grep node
+# CrashBet API proxy — survives DirectAdmin config rebuilds
+ProxyRequests Off
+ProxyPreserveHost On
+ProxyPass /api http://127.0.0.1:3001/api
+ProxyPassReverse /api http://127.0.0.1:3001/api
+---
+│ pid path          │ /root/.pm2/pids/crashbet-api-13.pid                                     │
+LISTEN 0      511                                       *:8080            *:*    users:(("node /home/admi",pid=3924035,fd=19))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+LISTEN 0      511                                       *:7080            *:*    users:(("node /home/admi",pid=3924070,fd=25))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+LISTEN 0      511                                       *:7081            *:*    users:(("node /home/admi",pid=3924046,fd=19))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+[root@mail crashbet]#
