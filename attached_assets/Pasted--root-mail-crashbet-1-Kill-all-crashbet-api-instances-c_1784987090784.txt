@@ -1,0 +1,89 @@
+[root@mail crashbet]# # 1. Kill all crashbet-api instances cleanly
+pm2 delete crashbet-api || true
+# Kill anything still holding port 3001
+fuser -k 3001/tcp 2>/dev/null || true
+
+# 2. Rebuild the API from scratch
+cd ~/crashbet
+pnpm --filter @workspace/api-server run build
+
+# 3. Start it correctly with PM2
+PORT=3001 NODE_ENV=production pm2 start \
+  --name crashbet-api \
+  --interpreter node \
+  -- --enable-source-maps /root/crashbet/artifacts/api-server/dist/index.mjs
+
+pm2 save
+
+# 4. Check it's stable (wait 5 seconds then verify restart count is 0)
+sleep 5
+pm2 status
+
+# 5. Tail logs to confirm it's running properly
+pm2 logs crashbet-api --lines 20 --nostream
+
+>>>> In-memory PM2 is out-of-date, do:
+>>>> $ pm2 update
+In memory PM2 version: 7.0.1
+Local PM2 version: 7.0.3
+
+[PM2] Applying action deleteProcessId on app [crashbet-api](ids: [ 7 ])
+[PM2] [crashbet-api](7) ✓
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 3  │ betcheza           │ fork     │ 67   │ online    │ 0%       │ 1.6gb    │
+│ 0  │ dossy              │ fork     │ 0    │ online    │ 0%       │ 21.2mb   │
+│ 2  │ naughtyhaughty-api │ fork     │ 0    │ online    │ 0%       │ 84.9mb   │
+│ 4  │ rdn-api            │ fork     │ 0    │ online    │ 0%       │ 172.4mb  │
+│ 1  │ wet3camp-api       │ fork     │ 0    │ online    │ 0%       │ 53.2mb   │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+ 617270
+> @workspace/api-server@0.0.0 build /root/crashbet/artifacts/api-server
+> node ./build.mjs
+
+
+  dist/index.mjs                       2.8mb ⚠️
+  dist/pino-worker.mjs               153.4kb
+  dist/pino-file.mjs                 142.0kb
+  dist/pino-pretty.mjs               114.4kb
+  dist/thread-stream-worker.mjs        7.3kb
+  dist/index.mjs.map                   5.0mb
+  dist/pino-worker.mjs.map           256.9kb
+  dist/pino-file.mjs.map             229.0kb
+  dist/pino-pretty.mjs.map           203.6kb
+  dist/thread-stream-worker.mjs.map   12.0kb
+
+⚡ Done in 2444ms
+[PM2][ERROR] File ecosystem.config.js not found
+[PM2] Saving current process list...
+
+>>>> In-memory PM2 is out-of-date, do:
+>>>> $ pm2 update
+In memory PM2 version: 7.0.1
+Local PM2 version: 7.0.3
+
+[PM2] Successfully saved in /root/.pm2/dump.pm2
+
+>>>> In-memory PM2 is out-of-date, do:
+>>>> $ pm2 update
+In memory PM2 version: 7.0.1
+Local PM2 version: 7.0.3
+
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 3  │ betcheza           │ fork     │ 68   │ online    │ 100%     │ 289.1mb  │
+│ 0  │ dossy              │ fork     │ 0    │ online    │ 0%       │ 21.2mb   │
+│ 2  │ naughtyhaughty-api │ fork     │ 0    │ online    │ 0%       │ 85.5mb   │
+│ 4  │ rdn-api            │ fork     │ 0    │ online    │ 0%       │ 173.1mb  │
+│ 1  │ wet3camp-api       │ fork     │ 0    │ online    │ 0%       │ 53.6mb   │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+
+>>>> In-memory PM2 is out-of-date, do:
+>>>> $ pm2 update
+In memory PM2 version: 7.0.1
+Local PM2 version: 7.0.3
+
+[TAILING] Tailing last 20 lines for [crashbet-api] process (change the value with --lines option)
+[root@mail crashbet]#
