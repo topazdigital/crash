@@ -50,3 +50,6 @@ Thumbs.db
 
 # Production secrets — never commit
 .env.production
+
+# Uploaded assets / pasted transcripts — may contain sensitive info
+attached_assets/
