@@ -1,0 +1,21 @@
+[root@mail crashbet]# pm2 status && ss -tlnp | grep -E '300[0-9]'
+
+>>>> In-memory PM2 is out-of-date, do:
+>>>> $ pm2 update
+In memory PM2 version: 7.0.1
+Local PM2 version: 7.0.3
+
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 27 │ betcheza           │ fork     │ 0    │ online    │ 50%      │ 819.0mb  │
+│ 30 │ crashbet-api       │ fork     │ 43   │ online    │ 50%      │ 97.3mb   │
+│ 0  │ dossy              │ fork     │ 0    │ online    │ 0%       │ 21.1mb   │
+│ 2  │ naughtyhaughty-api │ fork     │ 0    │ online    │ 0%       │ 126.4mb  │
+│ 28 │ rdn-api            │ fork     │ 0    │ online    │ 0%       │ 172.9mb  │
+│ 1  │ wet3camp-api       │ fork     │ 4    │ online    │ 0%       │ 141.6mb  │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+LISTEN 0      511                                 0.0.0.0:3000      0.0.0.0:*    users:(("next-server (v1",pid=4011949,fd=18))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+LISTEN 0      511                                 0.0.0.0:3001      0.0.0.0:*    users:(("next-server (v1",pid=2297983,fd=19))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+LISTEN 0      511                                 0.0.0.0:3005      0.0.0.0:*    users:(("next-server (v1",pid=3924144,fd=18))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+[root@mail crashbet]#
