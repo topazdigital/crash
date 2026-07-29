@@ -85,12 +85,21 @@ export function useWallet(isAuthenticated: boolean) {
     [refresh],
   );
 
+  const updateBalance = useCallback((newBalance: number) => {
+    setWallet((previous) => ({
+      ...previous,
+      wallet: { ...previous.wallet, balance: newBalance.toFixed(2) },
+    }));
+  }, []);
+
   return {
     balance: Number(wallet.wallet.balance),
     currency: wallet.wallet.currency,
     loading,
     placeBet,
     settleBet,
+    refresh,
+    updateBalance,
     transactions: wallet.transactions,
   };
 }

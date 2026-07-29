@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { User } from '@/hooks/useAuth';
-import { Plane, LogOut, Wallet, LogIn, ShieldCheck } from 'lucide-react';
+import { Plane, LogOut, Wallet, LogIn, ShieldCheck, PlusCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface TopBarProps {
@@ -8,9 +8,10 @@ interface TopBarProps {
   balance: number;
   onLogout: () => void;
   onOpenAuth: (mode?: 'sign-in' | 'sign-up') => void;
+  onDeposit: () => void;
 }
 
-export default function TopBar({ user, balance, onLogout, onOpenAuth }: TopBarProps) {
+export default function TopBar({ user, balance, onLogout, onOpenAuth, onDeposit }: TopBarProps) {
   return (
     <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto flex items-center justify-between h-14 px-4">
@@ -23,13 +24,18 @@ export default function TopBar({ user, balance, onLogout, onOpenAuth }: TopBarPr
 
         {user ? (
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted border border-border">
+            <button
+              onClick={onDeposit}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted border border-border hover:border-primary/60 hover:bg-muted/80 transition-colors cursor-pointer group"
+              title="Click to deposit"
+            >
               <Wallet className="w-4 h-4 text-primary" />
               <span className="font-mono text-sm font-bold">{balance.toFixed(2)}</span>
               <span className="text-xs text-muted-foreground">KES</span>
-            </div>
+              <PlusCircle className="w-3.5 h-3.5 text-primary/60 group-hover:text-primary transition-colors" />
+            </button>
 
-            <span className="text-sm text-muted-foreground hidden sm:inline">{user.name}</span>
+            <span className="text-sm text-muted-foreground hidden sm:inline max-w-[120px] truncate" title={user.name}>{user.name}</span>
 
             {user.role === "admin" && (
               <Link to="/admin">

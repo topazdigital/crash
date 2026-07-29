@@ -33,6 +33,8 @@ export function useAuth() {
   const { signOut } = useClerk();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  // Incremented to manually trigger a re-fetch of /api/me (e.g. after profile update)
+  const [refreshTick, setRefreshTick] = useState(0);
 
   // Safety net: if Clerk never fires isLoaded (e.g. CDN blocked, bad key),
   // stop waiting after CLERK_LOAD_TIMEOUT_MS so the UI doesn't hang forever.
@@ -84,7 +86,7 @@ export function useAuth() {
     return () => {
       cancelled = true;
     };
-  }, [clerkLoaded, isSignedIn, clerkUser?.id]);
+  }, [clerkLoaded, isSignedIn, clerkUser?.id, refreshTick]);
 
   return {
     user,
@@ -92,5 +94,7 @@ export function useAuth() {
     isLoading,
     isAuthenticated: Boolean(clerkLoaded && isSignedIn && user),
     logout: () => signOut({ redirectUrl: "/" }),
+    /** Re-fetch /api/me (e.g. after updating profile name) */
+    refreshUser: () => setRefreshTick((n) => n + 1),
   };
 }

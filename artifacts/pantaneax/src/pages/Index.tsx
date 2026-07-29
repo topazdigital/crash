@@ -8,10 +8,17 @@ import GameHistory from '@/components/GameHistory';
 import TopBar from '@/components/TopBar';
 import TransactionList from '@/components/TransactionList';
 import AuthModal from '@/components/AuthModal';
+import DepositModal from '@/components/DepositModal';
+import UsernameModal from '@/components/UsernameModal';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
+/** Returns true when a name looks like a raw Clerk user ID (user_xxxx) */
+function isClerkId(name: string): boolean {
+  return /^user_[A-Za-z0-9]{20,}$/.test(name);
+}
+
 export default function Index() {
-  const { user, logout, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, logout, isAuthenticated, isLoading: authLoading, refreshUser } = useAuth();
   const game = useGameEngine();
   const wallet = useWallet(isAuthenticated);
   const lastBet1 = useRef<{ id: string; amount: number } | null>(null);
@@ -19,18 +26,28 @@ export default function Index() {
 
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'sign-in' | 'sign-up'>('sign-in');
+  const [depositModalOpen, setDepositModalOpen] = useState(false);
+  // Show username modal when user is logged in but has a raw Clerk ID as their name
+  const [usernameModalOpen, setUsernameModalOpen] = useState(false);
 
   const openAuth = useCallback((mode: 'sign-in' | 'sign-up' = 'sign-in') => {
     setAuthModalMode(mode);
     setAuthModalOpen(true);
   }, []);
 
-  // Auto-close the modal once Clerk reports the user as signed in
+  // Auto-close the auth modal once Clerk reports the user as signed in
   useEffect(() => {
     if (isAuthenticated && authModalOpen) {
       setAuthModalOpen(false);
     }
   }, [isAuthenticated, authModalOpen]);
+
+  // When user loads, check if their name needs to be set
+  useEffect(() => {
+    if (user && isClerkId(user.name) && !usernameModalOpen) {
+      setUsernameModalOpen(true);
+    }
+  }, [user?.name]);
 
   const handleBet1 = useCallback(async (amount: number) => {
     const id = await wallet.placeBet(amount, game.roundId || crypto.randomUUID());
@@ -83,6 +100,7 @@ export default function Index() {
         balance={wallet.balance}
         onLogout={logout}
         onOpenAuth={openAuth}
+        onDeposit={() => setDepositModalOpen(true)}
       />
 
       <main className="container mx-auto px-4 py-4 max-w-6xl">
@@ -151,6 +169,24 @@ export default function Index() {
         open={authModalOpen}
         defaultMode={authModalMode}
         onClose={() => setAuthModalOpen(false)}
+      />
+
+      <DepositModal
+        open={depositModalOpen}
+        onClose={() => setDepositModalOpen(false)}
+        onSuccess={(newBalance) => {
+          wallet.updateBalance(newBalance);
+          wallet.refresh();
+        }}
+      />
+
+      <UsernameModal
+        open={usernameModalOpen}
+        onDone={() => {
+          setUsernameModalOpen(false);
+          // Re-fetch /api/me so user.name updates from the saved value
+          refreshUser();
+        }}
       />
     </div>
   );
