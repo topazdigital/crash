@@ -43,6 +43,12 @@ app.use(express.urlencoded({ extended: true }));
 // The game is visible to everyone; no auth is needed for the stream.
 // Placing it here prevents Clerk from intercepting and 500-ing when
 // CLERK_SECRET_KEY is absent or when a user is not signed in.
+// ── Game state (REST poll) — for clients where SSE is blocked by a proxy ─────
+app.get("/api/game/state", (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  res.json(gameEngine.getSnapshot());
+});
+
 app.get("/api/game/stream", (req, res) => {
   res.setHeader("Content-Type", "text/event-stream; charset=utf-8");
   res.setHeader("Cache-Control", "no-store");

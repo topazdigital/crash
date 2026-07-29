@@ -80,22 +80,58 @@ export function useGameEngine(): GameState {
     rafRef.current = requestAnimationFrame(tick);
   };
 
-  // Fallback countdown: if SSE events stop arriving during the waiting phase
-  // (e.g. Apache buffers them), tick the local countdown forward so the UI
-  // doesn't freeze. The server event, when it eventually arrives, will
-  // overwrite with the authoritative value.
+  // Fallback: if SSE events stop arriving for >3 s, poll /api/game/state
+  // every second so the game still runs even when Apache buffers the stream.
+  // When a real SSE event arrives it takes over immediately.
   const startFallbackTimer = () => {
     stopFallbackTimer();
-    fallbackTimerRef.current = setInterval(() => {
+    fallbackTimerRef.current = setInterval(async () => {
       const silentMs = Date.now() - lastEventAtRef.current;
-      if (phaseRef.current !== 'waiting') return;
-      // Only kick in if we haven't heard from the server in >1.5 s
-      if (silentMs < 1500) return;
-      setState((prev) => {
-        if (prev.phase !== 'waiting') return prev;
-        const next = Math.max(0, prev.countdown - 1);
-        return { ...prev, countdown: next };
-      });
+      // SSE is healthy — nothing to do
+      if (silentMs < 3000) return;
+
+      try {
+        const res = await fetch('/api/game/state', { cache: 'no-store' });
+        if (!res.ok) return;
+        const event = await res.json() as ServerEvent;
+
+        // Stamp the last-received time so we don't spam polls unnecessarily
+        lastEventAtRef.current = Date.now();
+
+        if (event.phase === 'waiting') {
+          phaseRef.current = 'waiting';
+          stopRaf();
+          setState({
+            phase: 'waiting',
+            multiplier: 1.0,
+            history: event.history,
+            countdown: event.countdown ?? 5,
+            roundId: event.roundId,
+          });
+        } else if (event.phase === 'running') {
+          phaseRef.current = 'running';
+          startedAtRef.current = event.startedAt!;
+          setState((prev) => ({
+            ...prev,
+            phase: 'running',
+            roundId: event.roundId,
+            history: event.history,
+          }));
+          startRaf();
+        } else if (event.phase === 'crashed') {
+          phaseRef.current = 'crashed';
+          stopRaf();
+          setState({
+            phase: 'crashed',
+            multiplier: event.crashPoint!,
+            history: event.history,
+            countdown: 0,
+            roundId: event.roundId,
+          });
+        }
+      } catch {
+        // Network error — silently ignore, will retry next interval
+      }
     }, 1000);
   };
 

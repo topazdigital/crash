@@ -73,6 +73,9 @@ class ServerGameEngine {
   getPhase(): Phase { return this.phase; }
   getRoundId(): string { return this.roundId; }
 
+  /** Return the current game snapshot for REST polling clients. */
+  getSnapshot(): GameEvent { return this.snapshot(); }
+
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   private snapshot(): GameEvent {
