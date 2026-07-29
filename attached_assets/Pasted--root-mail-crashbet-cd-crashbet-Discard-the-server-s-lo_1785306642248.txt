@@ -1,0 +1,201 @@
+[root@mail crashbet]# cd ~/crashbet
+
+# Discard the server's local edit (it's already in GitHub — no need to keep it)
+git checkout -- artifacts/api-server/src/lib/gameEngine.ts
+
+# Now pull the latest code
+git pull origin main
+
+# Build and restart
+bash scripts/server-deploy.sh
+From https://github.com/topazdigital/crash
+ * branch            main       -> FETCH_HEAD
+Updating 3951369..745408d
+Fast-forward
+ artifacts/api-server/src/lib/gameEngine.ts                                  |   3 +-
+ artifacts/pantaneax/src/hooks/useGameEngine.ts                              |  33 +++++-
+ ...root-mail-crashbet-1-Restart-crashbet-api-on-a-free-po_1784998733803.txt |  87 ++++++++++++++
+ ...root-mail-crashbet-cat-usr-local-directadmin-data-user_1784998593477.txt |  15 +++
+ ...root-mail-crashbet-cd-root-crashbet-bash-scripts-serve_1784997150733.txt | 120 +++++++++++++++++++
+ ...root-mail-crashbet-pm2-delete-crashbet-api-cd-root-cra_1784998860794.txt |  70 +++++++++++
+ ...root-mail-crashbet-pm2-logs-crashbet-api-lines-30-nost_1784998808984.txt |  50 ++++++++
+ ...root-mail-crashbet-sed-n-240-330p-usr-local-directadmi_1784999157597.txt |  93 +++++++++++++++
+ ...root-mail-crashbet-ss-tlnp-grep-E-80-443-3001-ls-usr-l_1784998528006.txt |  39 +++++++
+ attached_assets/image_1784997080033.png                                     | Bin 0 -> 180904 bytes
+ attached_assets/image_1784997109802.png                                     | Bin 0 -> 300590 bytes
+ attached_assets/image_1785300250531.png                                     | Bin 0 -> 190064 bytes
+ scripts/server-deploy.sh                                                    |  89 +++++++++++---
+ scripts/vps-fix-apache.sh                                                   | 226 ++++++++++++++++++++++--------------
+ 14 files changed, 719 insertions(+), 106 deletions(-)
+ create mode 100644 attached_assets/Pasted--root-mail-crashbet-1-Restart-crashbet-api-on-a-free-po_1784998733803.txt
+ create mode 100644 attached_assets/Pasted--root-mail-crashbet-cat-usr-local-directadmin-data-user_1784998593477.txt
+ create mode 100644 attached_assets/Pasted--root-mail-crashbet-cd-root-crashbet-bash-scripts-serve_1784997150733.txt
+ create mode 100644 attached_assets/Pasted--root-mail-crashbet-pm2-delete-crashbet-api-cd-root-cra_1784998860794.txt
+ create mode 100644 attached_assets/Pasted--root-mail-crashbet-pm2-logs-crashbet-api-lines-30-nost_1784998808984.txt
+ create mode 100644 attached_assets/Pasted--root-mail-crashbet-sed-n-240-330p-usr-local-directadmi_1784999157597.txt
+ create mode 100644 attached_assets/Pasted--root-mail-crashbet-ss-tlnp-grep-E-80-443-3001-ls-usr-l_1784998528006.txt
+ create mode 100644 attached_assets/image_1784997080033.png
+ create mode 100644 attached_assets/image_1784997109802.png
+ create mode 100644 attached_assets/image_1785300250531.png
+  Using public_html: /home/admin/domains/aviator.betcheza.co.ke/public_html
+==> [1/7] Pulling latest code from GitHub...
+From https://github.com/topazdigital/crash
+ * branch            main       -> FETCH_HEAD
+Already up to date.
+==> [2/7] Installing / updating dependencies...
+Scope: all 9 workspace projects
+Lockfile is up to date, resolution step is skipped
+Already up to date
+. preinstall$ sh -c 'rm -f package-lock.json yarn.lock; case "$npm_config_user_agent" in pnpm/*) ;; *) echo "Use pnpm…
+└─ Done in 45ms
+╭ Warning ───────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                            │
+│   Ignored build scripts: @clerk/shared@3.47.8.                                             │
+│   Run "pnpm approve-builds" to pick which dependencies should be allowed to run scripts.   │
+│                                                                                            │
+╰────────────────────────────────────────────────────────────────────────────────────────────╯
+Done in 4.9s using pnpm v10.34.5
+==> [3/7] Loading production environment variables...
+==> [4/7] Building React frontend...
+
+> @workspace/pantaneax@0.0.0 build /root/crashbet/artifacts/pantaneax
+> vite build --config vite.config.ts
+
+vite v7.3.6 building client environment for production...
+✓ 1836 modules transformed.
+dist/public/index.html                   0.70 kB │ gzip:   0.34 kB
+dist/public/assets/index-Bc5zwyaq.css   70.78 kB │ gzip:  12.50 kB
+dist/public/assets/index-CnRqhOdy.js   501.00 kB │ gzip: 153.16 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 14.17s
+==> [5/7] Deploying frontend to public_html...
+  Frontend deployed to /home/admin/domains/aviator.betcheza.co.ke/public_html
+==> [6/7] Building API server...
+
+> @workspace/api-server@0.0.0 build /root/crashbet/artifacts/api-server
+> node ./build.mjs
+
+
+  dist/index.mjs                       2.8mb ⚠️
+  dist/pino-worker.mjs               153.4kb
+  dist/pino-file.mjs                 142.0kb
+  dist/pino-pretty.mjs               114.4kb
+  dist/thread-stream-worker.mjs        7.3kb
+  dist/index.mjs.map                   5.0mb
+  dist/pino-worker.mjs.map           256.9kb
+  dist/pino-file.mjs.map             229.0kb
+  dist/pino-pretty.mjs.map           203.6kb
+  dist/thread-stream-worker.mjs.map   12.0kb
+
+⚡ Done in 2288ms
+==> [7/7] Starting API server via PM2 with ecosystem config...
+  Ecosystem config written to /root/crashbet/ecosystem.config.cjs
+  API will listen on port 3001
+
+>>>> In-memory PM2 is out-of-date, do:
+>>>> $ pm2 update
+In memory PM2 version: 7.0.1
+Local PM2 version: 7.0.3
+
+[PM2] Applying action deleteProcessId on app [crashbet-api](ids: [ 15 ])
+[PM2] [crashbet-api](15) ✓
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 27 │ betcheza           │ fork     │ 0    │ online    │ 0%       │ 676.0mb  │
+│ 0  │ dossy              │ fork     │ 0    │ online    │ 0%       │ 21.5mb   │
+│ 2  │ naughtyhaughty-api │ fork     │ 0    │ online    │ 0%       │ 122.8mb  │
+│ 28 │ rdn-api            │ fork     │ 0    │ online    │ 0%       │ 169.3mb  │
+│ 1  │ wet3camp-api       │ fork     │ 4    │ online    │ 0%       │ 142.0mb  │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+
+>>>> In-memory PM2 is out-of-date, do:
+>>>> $ pm2 update
+In memory PM2 version: 7.0.1
+Local PM2 version: 7.0.3
+
+[PM2][WARN] Applications crashbet-api not running, starting...
+[PM2] App [crashbet-api] launched (1 instances)
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 27 │ betcheza           │ fork     │ 0    │ online    │ 0%       │ 676.0mb  │
+│ 29 │ crashbet-api       │ fork     │ 0    │ online    │ 0%       │ 25.4mb   │
+│ 0  │ dossy              │ fork     │ 0    │ online    │ 0%       │ 21.5mb   │
+│ 2  │ naughtyhaughty-api │ fork     │ 0    │ online    │ 0%       │ 122.8mb  │
+│ 28 │ rdn-api            │ fork     │ 0    │ online    │ 0%       │ 169.3mb  │
+│ 1  │ wet3camp-api       │ fork     │ 4    │ online    │ 0%       │ 142.0mb  │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+[PM2] Saving current process list...
+
+>>>> In-memory PM2 is out-of-date, do:
+>>>> $ pm2 update
+In memory PM2 version: 7.0.1
+Local PM2 version: 7.0.3
+
+[PM2] Successfully saved in /root/.pm2/dump.pm2
+  ✓ API is listening on port 3001
+
+================================================================
+ Deploy complete!
+  Frontend: https://aviator.betcheza.co.ke
+  API:      http://localhost:3001/api
+  PM2 logs: pm2 logs crashbet-api
+
+ If this is the first deploy or Apache hasn't been fixed yet:
+  bash /root/crashbet/scripts/vps-fix-apache.sh 3001
+================================================================
+[root@mail crashbet]# bash scripts/vps-fix-apache.sh 3001
+==> Backing up Apache config...
+    Backup saved.
+
+==> Patching VirtualHosts for aviator.betcheza.co.ke (API port: 3001)...
+
+  [Patching vhost containing aviator.betcheza.co.ke]
+  Removing old SSE rule: ProxyPass /api/game/stream http://127.0.0.1:3003/api/game/stream flushpackets=on
+  Removing old SSE rule: ProxyPassReverse /api/game/stream http://127.0.0.1:3003/api/game/stream
+  Removing old /api rule: ProxyPass /api http://127.0.0.1:3003/api
+  Removing old /api rule: ProxyPassReverse /api http://127.0.0.1:3003/api
+  Inserted SSE + /api proxy rules after ProxyPass /.well-known !
+
+  [Patching vhost containing aviator.betcheza.co.ke]
+  Removing old SSE rule: ProxyPass /api/game/stream http://127.0.0.1:3003/api/game/stream flushpackets=on
+  Removing old SSE rule: ProxyPassReverse /api/game/stream http://127.0.0.1:3003/api/game/stream
+  Removing old /api rule: ProxyPass /api http://127.0.0.1:3003/api
+  Removing old /api rule: ProxyPassReverse /api http://127.0.0.1:3003/api
+  Inserted SSE + /api proxy rules after ProxyPass /.well-known !
+
+Done patching httpd.conf.
+VirtualHosts with SSE rule and domain: 2
+    Added mod_deflate exclusion for /api/game/stream in /home/admin/domains/aviator.betcheza.co.ke/public_html/.htaccess
+
+==> Testing Apache config syntax...
+AH00112: Warning: DocumentRoot [/home/admin/domains/dossy.world/public_html/test] does not exist
+AH00112: Warning: DocumentRoot [/home/admin/domains/dossy.world/public_html/test] does not exist
+Syntax OK
+    Syntax OK.
+
+==> Reloading Apache...
+
+==> Verifying SSE endpoint is reachable...
+    SSE endpoint HTTP status: 404 (expect 200)
+
+================================================================
+ Apache SSE fix complete!
+
+ What was fixed:
+   - /api/game/stream now has flushpackets=on in BOTH vhosts
+   - /api proxy uses port 3001
+   - mod_deflate disabled for SSE endpoint
+
+ Verify the game works:
+   https://aviator.betcheza.co.ke
+
+ Check SSE is streaming (should see data: lines every second):
+   curl -N https://aviator.betcheza.co.ke/api/game/stream
+================================================================
+[root@mail crashbet]#
