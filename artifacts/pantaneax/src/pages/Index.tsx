@@ -9,6 +9,7 @@ import TopBar from '@/components/TopBar';
 import TransactionList from '@/components/TransactionList';
 import AuthModal from '@/components/AuthModal';
 import DepositModal from '@/components/DepositModal';
+import WithdrawModal from '@/components/WithdrawModal';
 import UsernameModal from '@/components/UsernameModal';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -27,6 +28,7 @@ export default function Index() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'sign-in' | 'sign-up'>('sign-in');
   const [depositModalOpen, setDepositModalOpen] = useState(false);
+  const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
   // Show username modal when user is logged in but has a raw Clerk ID as their name
   const [usernameModalOpen, setUsernameModalOpen] = useState(false);
 
@@ -101,6 +103,7 @@ export default function Index() {
         onLogout={logout}
         onOpenAuth={openAuth}
         onDeposit={() => setDepositModalOpen(true)}
+        onWithdraw={() => setWithdrawModalOpen(true)}
       />
 
       <main className="container mx-auto px-4 py-4 max-w-6xl">
@@ -174,6 +177,16 @@ export default function Index() {
       <DepositModal
         open={depositModalOpen}
         onClose={() => setDepositModalOpen(false)}
+        onSuccess={(newBalance) => {
+          wallet.updateBalance(newBalance);
+          wallet.refresh();
+        }}
+      />
+
+      <WithdrawModal
+        open={withdrawModalOpen}
+        balance={wallet.balance}
+        onClose={() => setWithdrawModalOpen(false)}
         onSuccess={(newBalance) => {
           wallet.updateBalance(newBalance);
           wallet.refresh();

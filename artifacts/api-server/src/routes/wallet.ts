@@ -9,6 +9,8 @@ import {
   withdrawalsTable,
 } from "@workspace/db";
 import { requireUser } from "../middlewares/auth";
+import { initiateStkPush, initiateWithdrawal, normalizePhone } from "../lib/payhero";
+import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
 
@@ -17,6 +19,10 @@ const router: IRouter = Router();
 function parseAmount(value: unknown): number | null {
   const n = typeof value === "number" ? value : Number(value);
   return Number.isFinite(n) && n > 0 ? Math.round(n * 100) / 100 : null;
+}
+
+function callbackBase(): string {
+  return (process.env.PAYHERO_CALLBACK_BASE_URL ?? "").replace(/\/$/, "");
 }
 
 // ─── Deposits ─────────────────────────────────────────────────────────────────
@@ -36,12 +42,31 @@ router.get("/wallet/deposits", requireUser, async (req, res, next) => {
   }
 });
 
+/** GET /api/wallet/deposits/:depositId/status — poll deposit status */
+router.get("/wallet/deposits/:depositId/status", requireUser, async (req, res, next) => {
+  try {
+    const deposit = (
+      await db
+        .select()
+        .from(depositsTable)
+        .where(eq(depositsTable.id, String(req.params.depositId)))
+        .limit(1)
+    )[0];
+
+    if (!deposit || deposit.userId !== req.appUser!.id) {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
+
+    res.json({ status: deposit.status, method: deposit.method });
+  } catch (err) {
+    next(err);
+  }
+});
+
 /**
  * POST /api/wallet/deposits
- * Initiate a deposit request.
- * Body: { amount: number, method?: string, phone?: string }
- * The deposit starts as "pending". A real implementation would trigger an
- * M-PESA STK push here and complete the deposit via a webhook callback.
+ * Triggers an M-PESA STK push. Body: { amount: number, phone: string }
  */
 router.post("/wallet/deposits", requireUser, async (req, res, next) => {
   try {
@@ -50,110 +75,56 @@ router.post("/wallet/deposits", requireUser, async (req, res, next) => {
       res.status(400).json({ error: "A positive deposit amount is required" });
       return;
     }
-    const method =
-      typeof req.body?.method === "string" ? req.body.method : "mpesa";
-    const phone =
-      typeof req.body?.phone === "string" ? req.body.phone.trim() || null : null;
+
+    const rawPhone = typeof req.body?.phone === "string" ? req.body.phone.trim() : "";
+    if (!rawPhone) {
+      res.status(400).json({ error: "Phone number is required for M-PESA" });
+      return;
+    }
+
+    let normalizedPhone: string;
+    try {
+      normalizedPhone = normalizePhone(rawPhone);
+    } catch {
+      res.status(400).json({ error: "Invalid phone number. Use format 07XXXXXXXX or 254XXXXXXXXX" });
+      return;
+    }
 
     const depositId = randomUUID();
     await db.insert(depositsTable).values({
       id: depositId,
       userId: req.appUser!.id,
       amount: depositAmount.toFixed(2),
-      method,
-      phone,
+      method: "mpesa",
+      phone: normalizedPhone,
       status: "pending",
     });
 
-    res.status(201).json({ depositId, status: "pending" });
+    const callbackUrl = `${callbackBase()}/api/wallet/payhero/callback`;
+    const stkResult = await initiateStkPush({
+      amount: depositAmount,
+      phoneNumber: normalizedPhone,
+      externalReference: depositId,
+      callbackUrl,
+    });
+
+    if (!stkResult.success) {
+      await db.update(depositsTable).set({ status: "failed" }).where(eq(depositsTable.id, depositId));
+      res.status(502).json({ error: stkResult.error ?? "STK push failed. Please try again." });
+      return;
+    }
+
+    logger.info({ depositId, phone: normalizedPhone, amount: depositAmount }, "STK push sent");
+
+    res.status(201).json({
+      depositId,
+      status: "pending",
+      message: stkResult.customerMessage ?? "Check your phone for an M-PESA prompt.",
+    });
   } catch (err) {
     next(err);
   }
 });
-
-/**
- * POST /api/wallet/deposits/:depositId/confirm  (admin or payment-webhook)
- * Marks a pending deposit as completed and credits the wallet.
- * Body: { providerRef?: string }
- */
-router.post(
-  "/wallet/deposits/:depositId/confirm",
-  requireUser,
-  async (req, res, next) => {
-    try {
-      const depositId = req.params.depositId;
-      const providerRef =
-        typeof req.body?.providerRef === "string"
-          ? req.body.providerRef.trim() || null
-          : null;
-
-      const result = await db.transaction(async (tx) => {
-        const deposit = (
-          await tx
-            .select()
-            .from(depositsTable)
-            .where(eq(depositsTable.id, String(depositId)))
-            .limit(1)
-        )[0];
-
-        if (!deposit || deposit.userId !== req.appUser!.id) {
-          return { error: "Deposit not found" as const };
-        }
-        if (deposit.status !== "pending") {
-          return { error: "Deposit is not pending" as const };
-        }
-
-        const depositAmount = Number(deposit.amount);
-
-        // Credit wallet
-        const wallet = (
-          await tx
-            .select()
-            .from(walletsTable)
-            .where(eq(walletsTable.userId, req.appUser!.id))
-            .limit(1)
-        )[0];
-        const newBalance = Number(wallet?.balance ?? 0) + depositAmount;
-
-        await tx
-          .update(walletsTable)
-          .set({ balance: newBalance.toFixed(2) })
-          .where(eq(walletsTable.userId, req.appUser!.id));
-
-        // Mark deposit complete
-        await tx
-          .update(depositsTable)
-          .set({
-            status: "completed",
-            providerRef,
-            completedAt: new Date(),
-          })
-          .where(eq(depositsTable.id, String(depositId)));
-
-        // Write transaction record
-        await tx.insert(transactionsTable).values({
-          id: randomUUID(),
-          userId: req.appUser!.id,
-          type: "deposit",
-          amount: deposit.amount,
-          balanceAfter: newBalance.toFixed(2),
-          reference: String(depositId),
-          description: `Deposit via ${deposit.method}: ${depositAmount.toFixed(2)} KES`,
-        });
-
-        return { balance: newBalance.toFixed(2) };
-      });
-
-      if ("error" in result) {
-        res.status(400).json(result);
-        return;
-      }
-      res.json({ ok: true, ...result });
-    } catch (err) {
-      next(err);
-    }
-  },
-);
 
 // ─── Withdrawals ──────────────────────────────────────────────────────────────
 
@@ -174,27 +145,30 @@ router.get("/wallet/withdrawals", requireUser, async (req, res, next) => {
 
 /**
  * POST /api/wallet/withdrawals
- * Request a withdrawal.
- * Body: { amount: number, method?: string, phone?: string, accountDetails?: string }
- * Balance is immediately deducted (held) and the withdrawal starts as "pending".
+ * Deducts balance and initiates an M-PESA B2C payout.
+ * Body: { amount: number, phone: string }
  */
 router.post("/wallet/withdrawals", requireUser, async (req, res, next) => {
   try {
     const withdrawAmount = parseAmount(req.body?.amount);
     if (!withdrawAmount) {
-      res
-        .status(400)
-        .json({ error: "A positive withdrawal amount is required" });
+      res.status(400).json({ error: "A positive withdrawal amount is required" });
       return;
     }
-    const method =
-      typeof req.body?.method === "string" ? req.body.method : "mpesa";
-    const phone =
-      typeof req.body?.phone === "string" ? req.body.phone.trim() || null : null;
-    const accountDetails =
-      typeof req.body?.accountDetails === "string"
-        ? req.body.accountDetails.trim() || null
-        : null;
+
+    const rawPhone = typeof req.body?.phone === "string" ? req.body.phone.trim() : "";
+    if (!rawPhone) {
+      res.status(400).json({ error: "Phone number is required for M-PESA withdrawal" });
+      return;
+    }
+
+    let normalizedPhone: string;
+    try {
+      normalizedPhone = normalizePhone(rawPhone);
+    } catch {
+      res.status(400).json({ error: "Invalid phone number. Use format 07XXXXXXXX or 254XXXXXXXXX" });
+      return;
+    }
 
     const result = await db.transaction(async (tx) => {
       const wallet = (
@@ -211,8 +185,6 @@ router.post("/wallet/withdrawals", requireUser, async (req, res, next) => {
       }
 
       const newBalance = balance - withdrawAmount;
-
-      // Deduct balance immediately (hold funds)
       await tx
         .update(walletsTable)
         .set({ balance: newBalance.toFixed(2) })
@@ -223,13 +195,11 @@ router.post("/wallet/withdrawals", requireUser, async (req, res, next) => {
         id: withdrawalId,
         userId: req.appUser!.id,
         amount: withdrawAmount.toFixed(2),
-        method,
-        phone,
-        accountDetails,
+        method: "mpesa",
+        phone: normalizedPhone,
         status: "pending",
       });
 
-      // Record transaction
       await tx.insert(transactionsTable).values({
         id: randomUUID(),
         userId: req.appUser!.id,
@@ -237,7 +207,7 @@ router.post("/wallet/withdrawals", requireUser, async (req, res, next) => {
         amount: withdrawAmount.toFixed(2),
         balanceAfter: newBalance.toFixed(2),
         reference: withdrawalId,
-        description: `Withdrawal request via ${method}: ${withdrawAmount.toFixed(2)} KES`,
+        description: `M-PESA withdrawal request: ${withdrawAmount.toFixed(2)} KES`,
       });
 
       return { withdrawalId, balance: newBalance.toFixed(2) };
@@ -247,7 +217,42 @@ router.post("/wallet/withdrawals", requireUser, async (req, res, next) => {
       res.status(400).json(result);
       return;
     }
-    res.status(201).json({ status: "pending", ...result });
+
+    // Trigger PayHero B2C payout
+    const callbackUrl = `${callbackBase()}/api/wallet/payhero/withdrawal-callback`;
+    const payoutResult = await initiateWithdrawal({
+      amount: withdrawAmount,
+      phoneNumber: normalizedPhone,
+      externalReference: result.withdrawalId,
+      callbackUrl,
+    });
+
+    if (!payoutResult.success) {
+      // Payout couldn't be initiated — refund immediately
+      await db.transaction(async (tx) => {
+        const wallet = (
+          await tx.select().from(walletsTable).where(eq(walletsTable.userId, req.appUser!.id)).limit(1)
+        )[0];
+        const refunded = Number(wallet?.balance ?? 0) + withdrawAmount;
+        await tx.update(walletsTable).set({ balance: refunded.toFixed(2) }).where(eq(walletsTable.userId, req.appUser!.id));
+        await tx.update(withdrawalsTable).set({ status: "failed" }).where(eq(withdrawalsTable.id, result.withdrawalId));
+        await tx.insert(transactionsTable).values({
+          id: randomUUID(),
+          userId: req.appUser!.id,
+          type: "refund",
+          amount: withdrawAmount.toFixed(2),
+          balanceAfter: refunded.toFixed(2),
+          reference: result.withdrawalId,
+          description: `Withdrawal failed — ${withdrawAmount.toFixed(2)} KES refunded`,
+        });
+      });
+      res.status(502).json({ error: payoutResult.error ?? "Payout failed. Your balance has been restored." });
+      return;
+    }
+
+    logger.info({ withdrawalId: result.withdrawalId, phone: normalizedPhone, amount: withdrawAmount }, "B2C payout sent");
+
+    res.status(201).json({ status: "pending", balance: result.balance });
   } catch (err) {
     next(err);
   }
@@ -255,7 +260,7 @@ router.post("/wallet/withdrawals", requireUser, async (req, res, next) => {
 
 /**
  * POST /api/wallet/withdrawals/:withdrawalId/cancel
- * User cancels a pending withdrawal — balance is restored.
+ * Cancels a pending withdrawal and restores the balance.
  */
 router.post(
   "/wallet/withdrawals/:withdrawalId/cancel",
@@ -280,24 +285,12 @@ router.post(
 
         const refundAmount = Number(withdrawal.amount);
         const wallet = (
-          await tx
-            .select()
-            .from(walletsTable)
-            .where(eq(walletsTable.userId, req.appUser!.id))
-            .limit(1)
+          await tx.select().from(walletsTable).where(eq(walletsTable.userId, req.appUser!.id)).limit(1)
         )[0];
         const newBalance = Number(wallet?.balance ?? 0) + refundAmount;
 
-        await tx
-          .update(walletsTable)
-          .set({ balance: newBalance.toFixed(2) })
-          .where(eq(walletsTable.userId, req.appUser!.id));
-
-        await tx
-          .update(withdrawalsTable)
-          .set({ status: "cancelled", processedAt: new Date() })
-          .where(eq(withdrawalsTable.id, withdrawal.id));
-
+        await tx.update(walletsTable).set({ balance: newBalance.toFixed(2) }).where(eq(walletsTable.userId, req.appUser!.id));
+        await tx.update(withdrawalsTable).set({ status: "cancelled", processedAt: new Date() }).where(eq(withdrawalsTable.id, withdrawal.id));
         await tx.insert(transactionsTable).values({
           id: randomUUID(),
           userId: req.appUser!.id,

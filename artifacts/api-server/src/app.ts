@@ -5,6 +5,7 @@ import { clerkMiddleware } from "@clerk/express";
 import { publishableKeyFromHost } from "@clerk/shared/keys";
 import { randomUUID } from "node:crypto";
 import router from "./routes";
+import webhookRouter from "./routes/webhooks";
 import { logger } from "./lib/logger";
 import {
   CLERK_PROXY_PATH,
@@ -38,6 +39,12 @@ app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
 app.use(cors({ credentials: true, origin: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// ── PayHero webhooks — mounted BEFORE Clerk middleware ────────────────────────
+// PayHero sends plain POST requests with no Clerk session. Mount these before
+// the Clerk middleware so they are never blocked when CLERK_SECRET_KEY is
+// absent (dev) or when the request carries no auth header (production callback).
+app.use("/api", webhookRouter);
 
 // ── Game stream (SSE) — mounted BEFORE Clerk middleware ───────────────────────
 // The game is visible to everyone; no auth is needed for the stream.

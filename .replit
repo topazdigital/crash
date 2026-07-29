@@ -27,3 +27,6 @@ channel = "stable-25_05"
 [userenv.shared]
 BASE_PATH = "/"
 VITE_CLERK_PUBLISHABLE_KEY = "pk_test_c2hhcmluZy1zdW5iZWFtLTE1LmNsZXJrLmFjY291bnRzLmRldiQ"
+PAYHERO_ACCOUNT_ID = "5107"
+PAYHERO_CALLBACK_BASE_URL = "https://aviator.betcheza.co.ke"
+PAYHERO_CHANNEL_ID = "7470"

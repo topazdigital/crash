@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { User } from '@/hooks/useAuth';
-import { Plane, LogOut, Wallet, LogIn, ShieldCheck, PlusCircle } from 'lucide-react';
+import { Plane, LogOut, Wallet, LogIn, ShieldCheck, PlusCircle, ArrowUpFromLine } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface TopBarProps {
@@ -9,9 +9,10 @@ interface TopBarProps {
   onLogout: () => void;
   onOpenAuth: (mode?: 'sign-in' | 'sign-up') => void;
   onDeposit: () => void;
+  onWithdraw: () => void;
 }
 
-export default function TopBar({ user, balance, onLogout, onOpenAuth, onDeposit }: TopBarProps) {
+export default function TopBar({ user, balance, onLogout, onOpenAuth, onDeposit, onWithdraw }: TopBarProps) {
   return (
     <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto flex items-center justify-between h-14 px-4">
@@ -24,10 +25,11 @@ export default function TopBar({ user, balance, onLogout, onOpenAuth, onDeposit 
 
         {user ? (
           <div className="flex items-center gap-3">
+            {/* Balance + Deposit */}
             <button
               onClick={onDeposit}
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted border border-border hover:border-primary/60 hover:bg-muted/80 transition-colors cursor-pointer group"
-              title="Click to deposit"
+              title="Deposit funds"
             >
               <Wallet className="w-4 h-4 text-primary" />
               <span className="font-mono text-sm font-bold">{balance.toFixed(2)}</span>
@@ -35,7 +37,19 @@ export default function TopBar({ user, balance, onLogout, onOpenAuth, onDeposit 
               <PlusCircle className="w-3.5 h-3.5 text-primary/60 group-hover:text-primary transition-colors" />
             </button>
 
-            <span className="text-sm text-muted-foreground hidden sm:inline max-w-[120px] truncate" title={user.name}>{user.name}</span>
+            {/* Withdraw */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onWithdraw}
+              className="hidden sm:flex items-center gap-1.5 border-border text-muted-foreground hover:text-foreground"
+              title="Withdraw funds"
+            >
+              <ArrowUpFromLine className="w-3.5 h-3.5" />
+              <span className="text-xs">Withdraw</span>
+            </Button>
+
+            <span className="text-sm text-muted-foreground hidden md:inline max-w-[100px] truncate" title={user.name}>{user.name}</span>
 
             {user.role === "admin" && (
               <Link to="/admin">
