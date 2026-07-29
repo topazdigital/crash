@@ -7,7 +7,7 @@
 set -e
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-API_PORT=3001
+API_PORT=3002
 APP_NAME="crashbet-api"
 
 # Auto-detect public_html path (DirectAdmin stores domains under /home/<user>/domains/)
