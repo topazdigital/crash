@@ -47,15 +47,24 @@ export function useGameEngine(): GameState {
     roundId: '',
   });
 
-  // Refs used inside the rAF loop (avoids stale closures)
+  // Refs used inside the rAF loop and fallback timer (avoids stale closures)
   const phaseRef = useRef<GamePhase>('waiting');
   const startedAtRef = useRef<number>(0);
   const rafRef = useRef<number | null>(null);
+  const lastEventAtRef = useRef<number>(Date.now());
+  const fallbackTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const stopRaf = () => {
     if (rafRef.current !== null) {
       cancelAnimationFrame(rafRef.current);
       rafRef.current = null;
+    }
+  };
+
+  const stopFallbackTimer = () => {
+    if (fallbackTimerRef.current !== null) {
+      clearInterval(fallbackTimerRef.current);
+      fallbackTimerRef.current = null;
     }
   };
 
@@ -71,10 +80,31 @@ export function useGameEngine(): GameState {
     rafRef.current = requestAnimationFrame(tick);
   };
 
+  // Fallback countdown: if SSE events stop arriving during the waiting phase
+  // (e.g. Apache buffers them), tick the local countdown forward so the UI
+  // doesn't freeze. The server event, when it eventually arrives, will
+  // overwrite with the authoritative value.
+  const startFallbackTimer = () => {
+    stopFallbackTimer();
+    fallbackTimerRef.current = setInterval(() => {
+      const silentMs = Date.now() - lastEventAtRef.current;
+      if (phaseRef.current !== 'waiting') return;
+      // Only kick in if we haven't heard from the server in >1.5 s
+      if (silentMs < 1500) return;
+      setState((prev) => {
+        if (prev.phase !== 'waiting') return prev;
+        const next = Math.max(0, prev.countdown - 1);
+        return { ...prev, countdown: next };
+      });
+    }, 1000);
+  };
+
   useEffect(() => {
     const es = new EventSource('/api/game/stream');
+    startFallbackTimer();
 
     es.onmessage = (e: MessageEvent<string>) => {
+      lastEventAtRef.current = Date.now();
       const event = JSON.parse(e.data) as ServerEvent;
 
       if (event.phase === 'waiting') {
@@ -119,6 +149,7 @@ export function useGameEngine(): GameState {
     return () => {
       es.close();
       stopRaf();
+      stopFallbackTimer();
     };
   }, []); // single connection per component mount
 
