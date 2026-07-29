@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useGameEngine } from '@/hooks/useGameEngine';
 import { useWallet } from '@/hooks/useWallet';
 import { useAuth } from '@/hooks/useAuth';
@@ -24,6 +24,13 @@ export default function Index() {
     setAuthModalMode(mode);
     setAuthModalOpen(true);
   }, []);
+
+  // Auto-close the modal once Clerk reports the user as signed in
+  useEffect(() => {
+    if (isAuthenticated && authModalOpen) {
+      setAuthModalOpen(false);
+    }
+  }, [isAuthenticated, authModalOpen]);
 
   const handleBet1 = useCallback(async (amount: number) => {
     const id = await wallet.placeBet(amount, game.roundId || crypto.randomUUID());

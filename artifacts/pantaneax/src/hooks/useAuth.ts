@@ -10,10 +10,22 @@ export interface User {
 }
 
 /** Maximum ms to wait for /api/me before giving up and showing the app unauthenticated. */
-const FETCH_TIMEOUT_MS = 10_000;
+const FETCH_TIMEOUT_MS = 5_000;
 
 /** Maximum ms to wait for Clerk to initialise before giving up. */
 const CLERK_LOAD_TIMEOUT_MS = 8_000;
+
+/** Build a minimal User from Clerk's own user object when the API is unreachable. */
+function clerkUserToUser(clerkUser: ReturnType<typeof useUser>["user"]): User | null {
+  if (!clerkUser) return null;
+  const name =
+    clerkUser.fullName ||
+    clerkUser.username ||
+    clerkUser.primaryEmailAddress?.emailAddress?.split("@")[0] ||
+    "Player";
+  const email = clerkUser.primaryEmailAddress?.emailAddress ?? "";
+  return { id: clerkUser.id, name, email, phone: null, role: "user" };
+}
 
 export function useAuth() {
   const { isLoaded: clerkLoaded, isSignedIn } = useClerkAuth();
@@ -49,9 +61,6 @@ export function useAuth() {
     let cancelled = false;
     setIsLoading(true);
 
-    // AbortSignal.timeout ensures the fetch fails (and loading clears) if the
-    // API server hangs without sending a response — the most common cause of
-    // the "Loading account..." infinite spinner on production VPS deployments.
     fetch("/api/me", {
       credentials: "include",
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
@@ -64,7 +73,9 @@ export function useAuth() {
         if (!cancelled) setUser(data.user);
       })
       .catch(() => {
-        if (!cancelled) setUser(null);
+        // API server is unavailable — fall back to Clerk's own user data so
+        // the UI correctly reflects the signed-in state.
+        if (!cancelled) setUser(clerkUserToUser(clerkUser));
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false);

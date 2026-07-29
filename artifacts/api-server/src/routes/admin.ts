@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type RequestHandler } from "express";
 import { count, desc, eq, sql } from "drizzle-orm";
 import {
   betsTable,
@@ -10,9 +10,9 @@ import {
 import { requireAdmin, requireUser } from "../middlewares/auth";
 
 const router: IRouter = Router();
-const adminOnly = [requireUser, requireAdmin];
+const adminOnly: RequestHandler[] = [requireUser, requireAdmin];
 
-router.get("/admin/overview", adminOnly, async (_req, res, next) => {
+router.get("/admin/overview", ...adminOnly, async (_req, res, next) => {
   try {
     const [userCount] = await db.select({ count: count() }).from(usersTable);
     const [betCount] = await db.select({ count: count() }).from(betsTable);
@@ -33,7 +33,7 @@ router.get("/admin/overview", adminOnly, async (_req, res, next) => {
   }
 });
 
-router.get("/admin/users", adminOnly, async (_req, res, next) => {
+router.get("/admin/users", ...adminOnly, async (_req, res, next) => {
   try {
     const users = await db
       .select({
@@ -54,7 +54,7 @@ router.get("/admin/users", adminOnly, async (_req, res, next) => {
   }
 });
 
-router.get("/admin/activity", adminOnly, async (_req, res, next) => {
+router.get("/admin/activity", ...adminOnly, async (_req, res, next) => {
   try {
     const activity = await db
       .select({

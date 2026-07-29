@@ -93,7 +93,7 @@ router.post("/game/bets/:betId/settle", requireUser, async (req, res, next) => {
         await tx
           .select()
           .from(betsTable)
-          .where(eq(betsTable.id, req.params.betId))
+          .where(eq(betsTable.id, String(req.params.betId)))
           .limit(1)
       )[0];
       if (!bet || bet.userId !== req.appUser!.id || bet.status !== "active") {
