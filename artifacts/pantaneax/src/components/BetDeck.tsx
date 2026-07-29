@@ -5,7 +5,6 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { GamePhase } from '@/hooks/useGameEngine';
 import { Bot, Lock } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 interface BetDeckProps {
   label: string;
@@ -16,9 +15,10 @@ interface BetDeckProps {
   onBet: (amount: number) => Promise<boolean>;
   onCashout: (multiplier: number) => Promise<void>;
   onLoss: () => Promise<void>;
+  onOpenAuth: (mode?: 'sign-in' | 'sign-up') => void;
 }
 
-export default function BetDeck({ label, phase, multiplier, balance, isAuthenticated, onBet, onCashout, onLoss }: BetDeckProps) {
+export default function BetDeck({ label, phase, multiplier, balance, isAuthenticated, onBet, onCashout, onLoss, onOpenAuth }: BetDeckProps) {
   const [betAmount, setBetAmount] = useState('100');
   const [activeBet, setActiveBet] = useState<number | null>(null);
   const [cashedOut, setCashedOut] = useState(false);
@@ -124,9 +124,9 @@ export default function BetDeck({ label, phase, multiplier, balance, isAuthentic
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-card/60 backdrop-blur-sm rounded-xl">
           <Lock className="w-6 h-6 text-primary" />
           <p className="text-sm text-muted-foreground text-center px-4">Sign in to place bets</p>
-          <Link to="/auth">
-            <Button size="sm" className="glow-primary font-semibold">Sign In / Register</Button>
-          </Link>
+          <Button size="sm" className="glow-primary font-semibold" onClick={() => onOpenAuth('sign-in')}>
+            Sign In / Register
+          </Button>
         </div>
       </div>
     );

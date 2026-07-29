@@ -40,7 +40,7 @@ export default function TransactionList({ transactions }: TransactionListProps) 
               "font-mono text-xs font-bold",
               isPositive ? "text-success" : "text-destructive"
             )}>
-              {isPositive ? '+' : '-'}{tx.amount.toFixed(2)}
+              {isPositive ? '+' : '-'}{parseFloat(tx.amount).toFixed(2)}
             </span>
           </div>
         );

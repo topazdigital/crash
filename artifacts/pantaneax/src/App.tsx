@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ClerkProvider } from "@clerk/react";
 import Index from "./pages/Index";
-import { SignInPage, SignUpPage } from "./pages/Auth";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
@@ -31,8 +30,8 @@ const App = () => (
   <ClerkProvider
     publishableKey={clerkPubKey}
     proxyUrl={clerkProxyUrl}
-    signInUrl={`${basePath}/sign-in`}
-    signUpUrl={`${basePath}/sign-up`}
+    signInUrl={`${basePath}/`}
+    signUpUrl={`${basePath}/`}
   >
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -41,9 +40,6 @@ const App = () => (
         <BrowserRouter basename={import.meta.env.BASE_URL}>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/sign-in/*" element={<SignInPage />} />
-            <Route path="/sign-up/*" element={<SignUpPage />} />
-            <Route path="/auth" element={<SignInPage />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

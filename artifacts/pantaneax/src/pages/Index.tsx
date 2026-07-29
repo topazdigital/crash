@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { useGameEngine } from '@/hooks/useGameEngine';
 import { useWallet } from '@/hooks/useWallet';
 import { useAuth } from '@/hooks/useAuth';
@@ -7,6 +7,7 @@ import BetDeck from '@/components/BetDeck';
 import GameHistory from '@/components/GameHistory';
 import TopBar from '@/components/TopBar';
 import TransactionList from '@/components/TransactionList';
+import AuthModal from '@/components/AuthModal';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function Index() {
@@ -15,6 +16,14 @@ export default function Index() {
   const wallet = useWallet(isAuthenticated);
   const lastBet1 = useRef<{ id: string; amount: number } | null>(null);
   const lastBet2 = useRef<{ id: string; amount: number } | null>(null);
+
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<'sign-in' | 'sign-up'>('sign-in');
+
+  const openAuth = useCallback((mode: 'sign-in' | 'sign-up' = 'sign-in') => {
+    setAuthModalMode(mode);
+    setAuthModalOpen(true);
+  }, []);
 
   const handleBet1 = useCallback(async (amount: number) => {
     const id = await wallet.placeBet(amount, game.roundId || crypto.randomUUID());
@@ -66,6 +75,7 @@ export default function Index() {
         user={user}
         balance={wallet.balance}
         onLogout={logout}
+        onOpenAuth={openAuth}
       />
 
       <main className="container mx-auto px-4 py-4 max-w-6xl">
@@ -85,6 +95,7 @@ export default function Index() {
               onBet={handleBet1}
               onCashout={handleCashout1}
               onLoss={handleLoss1}
+              onOpenAuth={openAuth}
             />
           </div>
 
@@ -108,6 +119,7 @@ export default function Index() {
               onBet={handleBet2}
               onCashout={handleCashout2}
               onLoss={handleLoss2}
+              onOpenAuth={openAuth}
             />
           </div>
         </div>
@@ -127,6 +139,12 @@ export default function Index() {
           </Tabs>
         </div>
       </main>
+
+      <AuthModal
+        open={authModalOpen}
+        defaultMode={authModalMode}
+        onClose={() => setAuthModalOpen(false)}
+      />
     </div>
   );
 }

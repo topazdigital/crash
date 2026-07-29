@@ -72,7 +72,7 @@ export default function Admin() {
   if (authLoading) {
     return <div className="min-h-screen grid place-items-center bg-background text-muted-foreground">Loading administrator access…</div>;
   }
-  if (!user) return <Navigate to="/sign-in" replace />;
+  if (!user) return <Navigate to="/" replace />;
   if (user.role !== "admin") return <Navigate to="/" replace />;
 
   return (

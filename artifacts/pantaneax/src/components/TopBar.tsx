@@ -7,9 +7,10 @@ interface TopBarProps {
   user: User | null;
   balance: number;
   onLogout: () => void;
+  onOpenAuth: (mode?: 'sign-in' | 'sign-up') => void;
 }
 
-export default function TopBar({ user, balance, onLogout }: TopBarProps) {
+export default function TopBar({ user, balance, onLogout, onOpenAuth }: TopBarProps) {
   return (
     <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto flex items-center justify-between h-14 px-4">
@@ -44,15 +45,13 @@ export default function TopBar({ user, balance, onLogout }: TopBarProps) {
           </div>
         ) : (
           <div className="flex items-center gap-2">
-            <Link to="/auth">
-              <Button variant="ghost" size="sm" className="gap-1.5">
-                <LogIn className="w-4 h-4" />
-                <span>Sign In</span>
-              </Button>
-            </Link>
-            <Link to="/auth">
-              <Button size="sm" className="glow-primary font-semibold">Register</Button>
-            </Link>
+            <Button variant="ghost" size="sm" className="gap-1.5" onClick={() => onOpenAuth('sign-in')}>
+              <LogIn className="w-4 h-4" />
+              <span>Sign In</span>
+            </Button>
+            <Button size="sm" className="glow-primary font-semibold" onClick={() => onOpenAuth('sign-up')}>
+              Register
+            </Button>
           </div>
         )}
       </div>
