@@ -47,6 +47,7 @@ Both start automatically when using the Run button.
 | Variable | Default | Description |
 |---|---|---|
 | `ADMIN_EMAILS` | — | Comma-separated list of admin email addresses |
+| `ADMIN_CLERK_IDS` | — | Comma-separated list of Clerk user IDs to grant admin (use when email isn't passed by Clerk JWT — find your ID in the `users` table's `clerk_id` column) |
 | `LOG_LEVEL` | `info` | Logging level (`debug`, `info`, `warn`, `error`) |
 
 ## Database

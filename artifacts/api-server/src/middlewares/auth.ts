@@ -45,7 +45,15 @@ export async function resolveUser(req: Request) {
       .map((item) => item.trim().toLowerCase())
       .filter(Boolean),
   );
-  const shouldBeAdmin = adminEmails.has(email.toLowerCase());
+  const adminClerkIds = new Set(
+    (process.env.ADMIN_CLERK_IDS ?? "")
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean),
+  );
+  const shouldBeAdmin =
+    adminEmails.has(email.toLowerCase()) ||
+    adminClerkIds.has(auth.userId);
 
   let user = (
     await db
