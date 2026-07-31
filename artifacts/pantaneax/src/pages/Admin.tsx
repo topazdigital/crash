@@ -98,10 +98,10 @@ export default function Admin() {
   const [deposits, setDeposits] = useState<AdminDeposit[]>([]);
   const [withdrawals, setWithdrawals] = useState<AdminWithdrawal[]>([]);
   const [error, setError] = useState("");
+  const [approvingId, setApprovingId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (user?.role !== "admin") return;
-    Promise.all([
+  function loadData() {
+    return Promise.all([
       fetch("/api/admin/overview",    { credentials: "include" }),
       fetch("/api/admin/users",       { credentials: "include" }),
       fetch("/api/admin/activity",    { credentials: "include" }),
@@ -128,7 +128,35 @@ export default function Admin() {
       .catch((reason: unknown) => {
         setError(reason instanceof Error ? reason.message : "Unable to load data");
       });
+  }
+
+  useEffect(() => {
+    if (user?.role !== "admin") return;
+    loadData();
   }, [user?.role]);
+
+  async function approveDeposit(depositId: string) {
+    setApprovingId(depositId);
+    try {
+      const res = await fetch(`/api/admin/deposits/${depositId}/approve`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      if (!res.ok) {
+        const data = await res.json() as { error?: string };
+        setError(data.error ?? "Failed to approve deposit");
+        return;
+      }
+      // Reload data to reflect new status and balance
+      await loadData();
+    } catch {
+      setError("Network error while approving deposit");
+    } finally {
+      setApprovingId(null);
+    }
+  }
 
   if (authLoading) {
     return <div className="min-h-screen grid place-items-center bg-background text-muted-foreground">Loading administrator access…</div>;
@@ -245,7 +273,8 @@ export default function Admin() {
                       <th className="py-3 pr-4">Phone</th>
                       <th className="py-3 pr-4">M-PESA Ref</th>
                       <th className="py-3 pr-4">Status</th>
-                      <th className="py-3">Date</th>
+                      <th className="py-3 pr-4">Date</th>
+                      <th className="py-3">Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -259,11 +288,24 @@ export default function Admin() {
                         <td className="py-3 pr-4 font-mono text-muted-foreground">{d.phone ?? "—"}</td>
                         <td className="py-3 pr-4 font-mono text-xs text-muted-foreground">{d.providerRef ?? "—"}</td>
                         <td className="py-3 pr-4"><StatusBadge status={d.status} /></td>
-                        <td className="py-3 text-muted-foreground text-xs">{new Date(d.createdAt).toLocaleString()}</td>
+                        <td className="py-3 pr-4 text-muted-foreground text-xs">{new Date(d.createdAt).toLocaleString()}</td>
+                        <td className="py-3">
+                          {d.status === "pending" ? (
+                            <button
+                              onClick={() => approveDeposit(d.id)}
+                              disabled={approvingId === d.id}
+                              className="inline-flex items-center gap-1.5 rounded bg-green-600 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-medium px-3 py-1.5 transition-colors"
+                            >
+                              {approvingId === d.id ? "Approving…" : "✓ Approve"}
+                            </button>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                        </td>
                       </tr>
                     ))}
                     {deposits.length === 0 && (
-                      <tr><td colSpan={6} className="py-8 text-center text-muted-foreground">No deposits yet.</td></tr>
+                      <tr><td colSpan={7} className="py-8 text-center text-muted-foreground">No deposits yet.</td></tr>
                     )}
                   </tbody>
                 </table>
