@@ -12,6 +12,7 @@ import {
 } from "@workspace/db";
 import { requireAdmin, requireUser } from "../middlewares/auth";
 import { sendMail, depositApprovedEmail } from "../lib/mailer.js";
+import { getClerkUserEmail } from "../lib/clerk.js";
 
 const router: IRouter = Router();
 const adminOnly: RequestHandler[] = [requireUser, requireAdmin];
@@ -158,6 +159,7 @@ router.post("/admin/deposits/:id/approve", ...adminOnly, async (req, res, next) 
           depositStatus: depositsTable.status,
           depositAmount: depositsTable.amount,
           userId: depositsTable.userId,
+          userClerkId: usersTable.clerkId,
           userName: usersTable.name,
           userEmail: usersTable.email,
           walletId: walletsTable.id,
@@ -199,6 +201,7 @@ router.post("/admin/deposits/:id/approve", ...adminOnly, async (req, res, next) 
 
       return {
         ok: true as const,
+        userClerkId: row.userClerkId,
         userName: row.userName,
         userEmail: row.userEmail,
         amount: amount.toFixed(2),
@@ -211,15 +214,21 @@ router.post("/admin/deposits/:id/approve", ...adminOnly, async (req, res, next) 
       return;
     }
 
-    // Send email asynchronously — don't block the response
-    const emailContent = depositApprovedEmail({
-      userName: result.userName,
-      amount: result.amount,
-      currency: "KES",
-      newBalance: result.newBalance,
-      adminNote: adminNote || "We apologise for the delay — our payment systems experienced a brief disruption. Your funds are now available.",
-    });
-    sendMail({ to: result.userEmail, ...emailContent }).catch(() => {/* logged inside sendMail */});
+    // Send email asynchronously — fetch real email from Clerk if stored one is fake
+    (async () => {
+      let toEmail = result.userEmail;
+      if (toEmail.endsWith("@account.invalid")) {
+        toEmail = (await getClerkUserEmail(result.userClerkId)) ?? toEmail;
+      }
+      const emailContent = depositApprovedEmail({
+        userName: result.userName,
+        amount: result.amount,
+        currency: "KES",
+        newBalance: result.newBalance,
+        adminNote: adminNote || "We apologise for the delay — our payment systems experienced a brief disruption. Your funds are now available.",
+      });
+      await sendMail({ to: toEmail, ...emailContent });
+    })().catch(() => {/* logged inside sendMail */});
 
     res.json({ ok: true, newBalance: result.newBalance });
   } catch (error) {

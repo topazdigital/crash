@@ -3,6 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { db, usersTable, walletsTable } from "@workspace/db";
 import type { NextFunction, Request, Response } from "express";
 import { randomUUID } from "node:crypto";
+import { getClerkUserEmail, getClerkUserName } from "../lib/clerk.js";
 
 type SessionClaims = Record<string, unknown>;
 
@@ -28,17 +29,24 @@ export async function resolveUser(req: Request) {
   const auth = getAuth(req);
   if (!auth.userId) return null;
 
-  const email =
+  // Try JWT claims first; fall back to Clerk backend API for real email/name
+  const jwtEmail =
     claimString(req, "email") ??
-    claimString(req, "primaryEmailAddress") ??
-    `${auth.userId}@account.invalid`;
+    claimString(req, "primaryEmailAddress");
   const firstName = claimString(req, "firstName") ?? "";
   const lastName = claimString(req, "lastName") ?? "";
-  const name =
-    [firstName, lastName].filter(Boolean).join(" ") ||
-    claimString(req, "name") ||
-    email.split("@")[0] ||
-    "Player";
+  const jwtName = [firstName, lastName].filter(Boolean).join(" ") || claimString(req, "name");
+
+  // If JWT didn't include real data, look it up from Clerk API
+  const [apiEmail, apiName] = (jwtEmail && jwtName)
+    ? [null, null]
+    : await Promise.all([
+        jwtEmail ? null : getClerkUserEmail(auth.userId),
+        jwtName  ? null : getClerkUserName(auth.userId),
+      ]);
+
+  const email = jwtEmail ?? apiEmail ?? `${auth.userId}@account.invalid`;
+  const name = jwtName ?? apiName ?? email.split("@")[0] ?? "Player";
   const adminEmails = new Set(
     (process.env.ADMIN_EMAILS ?? "")
       .split(",")
@@ -81,12 +89,21 @@ export async function resolveUser(req: Request) {
     user = (
       await db.select().from(usersTable).where(eq(usersTable.id, id)).limit(1)
     )[0];
-  } else if (shouldBeAdmin && user.role !== "admin") {
-    await db
-      .update(usersTable)
-      .set({ role: "admin", email, name })
-      .where(and(eq(usersTable.id, user.id), eq(usersTable.clerkId, auth.userId)));
-    user = { ...user, role: "admin", email, name };
+  } else {
+    // Patch stale/fake email or name whenever we have better data
+    const needsEmailUpdate = user.email.endsWith("@account.invalid") && !email.endsWith("@account.invalid");
+    const needsNameUpdate = (user.name === user.email.split("@")[0] || user.name === "Player") && name !== user.name;
+    const updates: Record<string, unknown> = {};
+    if (shouldBeAdmin && user.role !== "admin") updates.role = "admin";
+    if (needsEmailUpdate) updates.email = email;
+    if (needsNameUpdate) updates.name = name;
+    if (Object.keys(updates).length > 0) {
+      await db
+        .update(usersTable)
+        .set(updates)
+        .where(and(eq(usersTable.id, user.id), eq(usersTable.clerkId, auth.userId)));
+      user = { ...user, ...updates } as typeof user;
+    }
   }
 
   return user;

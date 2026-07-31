@@ -49,6 +49,11 @@ Both start automatically when using the Run button.
 | `ADMIN_EMAILS` | — | Comma-separated list of admin email addresses |
 | `ADMIN_CLERK_IDS` | — | Comma-separated list of Clerk user IDs to grant admin (use when email isn't passed by Clerk JWT — find your ID in the `users` table's `clerk_id` column) |
 | `LOG_LEVEL` | `info` | Logging level (`debug`, `info`, `warn`, `error`) |
+| `SMTP_HOST` | — | Mail server hostname (e.g. `mail.betcheza.co.ke`) — enables deposit approval emails |
+| `SMTP_PORT` | `465` | SMTP port (465 = SSL, 587 = STARTTLS) |
+| `SMTP_USER` | — | SMTP login username (e.g. `no-reply@betcheza.co.ke`) |
+| `SMTP_PASS` | — | SMTP password |
+| `SMTP_FROM` | — | From address shown to recipients (e.g. `PantaneAX <no-reply@betcheza.co.ke>`) |
 
 ## Database
 
